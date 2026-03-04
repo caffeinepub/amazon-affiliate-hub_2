@@ -51,11 +51,8 @@ export default function MarketplacePage() {
             </h1>
           </div>
           <p className="text-muted-foreground text-sm max-w-lg">
-            Direct from Chinese sellers. All prices include a{" "}
-            <span className="text-primary font-semibold">
-              50% platform margin
-            </span>
-            . Contact sellers directly to arrange shipping.
+            Browse listings from verified sellers. Contact sellers directly to
+            arrange shipping.
           </p>
         </div>
         <Link to="/seller">

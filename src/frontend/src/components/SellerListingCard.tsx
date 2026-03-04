@@ -42,9 +42,9 @@ export default function SellerListingCard({
               `https://picsum.photos/seed/${listing.id}/400/300`;
           }}
         />
-        {/* Chinese marketplace badge */}
+        {/* Marketplace badge */}
         <div className="absolute top-2 left-2 px-2 py-0.5 rounded-full text-[10px] font-bold text-white shadow-sm bg-rose-600">
-          🇨🇳 Marketplace
+          Marketplace
         </div>
       </div>
 
@@ -81,7 +81,7 @@ export default function SellerListingCard({
             {formatPrice(retailPrice)}
           </div>
           <div className="text-[10px] text-muted-foreground">
-            Retail price (50% platform margin applied)
+            Platform price · seller ships directly
           </div>
         </div>
 

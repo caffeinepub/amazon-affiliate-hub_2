@@ -102,7 +102,7 @@ export default function MarketplaceDetailPage() {
             />
           </div>
           <div className="absolute top-4 left-4 bg-rose-600 text-white px-3 py-1 rounded-full text-sm font-bold">
-            🇨🇳 Marketplace
+            Marketplace
           </div>
         </div>
 
@@ -110,9 +110,6 @@ export default function MarketplaceDetailPage() {
         <div className="flex flex-col gap-4">
           {/* Category badge */}
           <div className="flex flex-wrap items-center gap-2">
-            <span className="px-3 py-1 rounded-full text-xs font-bold text-white bg-rose-600">
-              Chinese Marketplace
-            </span>
             <Badge variant="secondary" className="gap-1">
               <Tag className="w-3 h-3" />
               {listing.category}
@@ -129,12 +126,9 @@ export default function MarketplaceDetailPage() {
               {formatPrice(retailPrice)}
             </span>
             <div className="flex flex-col gap-0.5">
-              <span className="text-sm text-muted-foreground">
-                Seller base price: {formatPrice(listing.price)}
-              </span>
               <span className="text-xs text-muted-foreground/70 flex items-center gap-1">
                 <Globe className="w-3 h-3" />
-                50% platform margin applied to retail price
+                All prices include platform margin
               </span>
             </div>
           </div>
@@ -167,17 +161,15 @@ export default function MarketplaceDetailPage() {
             </div>
           )}
 
-          {/* Commission info */}
+          {/* Platform info */}
           <div className="bg-primary/5 border border-primary/20 rounded-xl p-4">
             <div className="font-heading font-semibold text-sm mb-1 text-primary">
-              Platform Info
+              How It Works
             </div>
             <p className="text-xs text-muted-foreground">
-              This listing is sold through our marketplace with a{" "}
-              <span className="font-semibold text-foreground">
-                {listing.commissionRate}% platform commission
-              </span>
-              . Contact the seller directly to arrange payment and shipping.
+              This listing is sold through our marketplace. Contact the seller
+              directly to arrange payment and shipping. Packaging and delivery
+              are handled by the seller.
             </p>
           </div>
 

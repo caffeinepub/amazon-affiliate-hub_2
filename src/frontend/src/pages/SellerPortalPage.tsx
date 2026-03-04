@@ -253,8 +253,6 @@ function SubmitListingForm() {
   const set = (k: keyof typeof form, v: string) =>
     setForm((f) => ({ ...f, [k]: v }));
 
-  const previewPrice = Number.parseFloat(form.price) || 0;
-
   return (
     <form onSubmit={(e) => void handleSubmit(e)} className="space-y-4 max-w-xl">
       {/* Note */}
@@ -265,17 +263,8 @@ function SubmitListingForm() {
         </div>
         <p className="text-muted-foreground">
           Your listing will be reviewed by our team. Once approved, it will
-          appear on the marketplace. The retail price shown to buyers will be
-          your price + 50% platform margin.
+          appear on the marketplace.
         </p>
-        {previewPrice > 0 && (
-          <p className="mt-2 text-foreground font-medium">
-            Your price {formatPrice(previewPrice)} → Retail price{" "}
-            <span className="text-primary">
-              {formatPrice(previewPrice * 1.5)}
-            </span>
-          </p>
-        )}
       </div>
 
       <div>
