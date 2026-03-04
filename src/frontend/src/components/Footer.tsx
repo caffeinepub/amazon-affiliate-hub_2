@@ -82,6 +82,14 @@ export default function Footer() {
                   Amazon Global Affiliate
                 </a>
               </li>
+              <li>
+                <a
+                  href="/payment"
+                  className="hover:text-primary transition-colors"
+                >
+                  Payment
+                </a>
+              </li>
             </ul>
           </div>
 

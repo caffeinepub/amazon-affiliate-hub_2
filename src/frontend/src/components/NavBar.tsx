@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Link, useNavigate } from "@tanstack/react-router";
 import {
   ChevronDown,
+  CreditCard,
   Globe,
   Menu,
   Search,
@@ -103,6 +104,16 @@ export default function NavBar({ onSearch, searchValue = "" }: NavBarProps) {
                 >
                   <Globe className="w-3.5 h-3.5" />
                   Marketplace
+                </Button>
+              </Link>
+              <Link to="/payment" data-ocid="nav.payment_link">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-secondary-foreground hover:text-primary hover:bg-white/10 gap-1"
+                >
+                  <CreditCard className="w-3.5 h-3.5" />
+                  Payment
                 </Button>
               </Link>
               {/* Affiliate dropdown */}
@@ -239,6 +250,20 @@ export default function NavBar({ onSearch, searchValue = "" }: NavBarProps) {
                 >
                   <Globe className="w-3.5 h-3.5" />
                   Marketplace
+                </Button>
+              </Link>
+              <Link
+                to="/payment"
+                onClick={() => setMobileMenuOpen(false)}
+                data-ocid="nav.payment_link"
+              >
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="w-full justify-start text-secondary-foreground hover:text-primary gap-2"
+                >
+                  <CreditCard className="w-3.5 h-3.5" />
+                  Payment
                 </Button>
               </Link>
               <Link

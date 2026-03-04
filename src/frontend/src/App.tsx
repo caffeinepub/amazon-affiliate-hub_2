@@ -18,6 +18,7 @@ import AffiliateAmazonIndiaPage from "./pages/AffiliateAmazonIndiaPage";
 import HomePage from "./pages/HomePage";
 import MarketplaceDetailPage from "./pages/MarketplaceDetailPage";
 import MarketplacePage from "./pages/MarketplacePage";
+import PaymentPage from "./pages/PaymentPage";
 import ProductDetailPage from "./pages/ProductDetailPage";
 import ProductsPage from "./pages/ProductsPage";
 import SellerPortalPage from "./pages/SellerPortalPage";
@@ -94,7 +95,13 @@ const affiliateAmazonGlobalRoute = createRoute({
   component: AffiliateAmazonGlobalPage,
 });
 
-// ── Router ────────────────────────────────────────────────────
+const paymentRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/payment",
+  component: PaymentPage,
+});
+
+// ── Router ────────────────────────────────────────────────
 const routeTree = rootRoute.addChildren([
   indexRoute,
   productsRoute,
@@ -105,6 +112,7 @@ const routeTree = rootRoute.addChildren([
   sellerRoute,
   affiliateAmazonIndiaRoute,
   affiliateAmazonGlobalRoute,
+  paymentRoute,
 ]);
 
 const router = createRouter({ routeTree });
