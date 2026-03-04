@@ -1,3 +1,4 @@
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -29,6 +30,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import {
+  Check,
   Loader2,
   Pencil,
   Plus,
@@ -40,21 +42,31 @@ import {
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import type { Brand, Product, SocialLinks } from "../backend";
+import type {
+  Brand,
+  Product,
+  SellerListingStatus,
+  SocialLinks,
+} from "../backend";
 import { CATEGORIES } from "../data/seedData";
 import { useInternetIdentity } from "../hooks/useInternetIdentity";
 import {
   useAddBrand,
   useAddProduct,
+  useAffiliateCode,
+  useAllSellerListingsAdmin,
   useBrands,
   useDeleteBrand,
   useDeleteProduct,
   useIsAdmin,
+  usePendingSellerListings,
   useProducts,
+  useSetAffiliateCode,
   useSetDealOfDay,
   useSetFeatured,
   useSocialLinks,
   useUpdateProduct,
+  useUpdateSellerListingStatus,
   useUpdateSocialLinks,
 } from "../hooks/useQueries";
 import { formatPrice, getVendorConfig } from "../utils/vendorUtils";
@@ -931,6 +943,311 @@ function SocialLinksTab() {
   );
 }
 
+// ── Affiliate Code Tab ────────────────────────────────────────────────────────
+
+function AffiliateCodeTab() {
+  const { data: currentCode = "" } = useAffiliateCode();
+  const setCodeMutation = useSetAffiliateCode();
+  const [code, setCode] = useState("");
+
+  // Sync from backend once loaded
+  useEffect(() => {
+    if (currentCode !== undefined) {
+      setCode(currentCode);
+    }
+  }, [currentCode]);
+
+  const handleSave = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      await setCodeMutation.mutateAsync(code);
+      toast.success("Affiliate code saved!");
+    } catch {
+      toast.error("Failed to save affiliate code");
+    }
+  };
+
+  return (
+    <form onSubmit={(e) => void handleSave(e)} className="max-w-lg space-y-4">
+      <p className="text-sm text-muted-foreground">
+        This code is appended to Amazon affiliate links as{" "}
+        <code className="bg-muted px-1.5 py-0.5 rounded text-xs font-mono">
+          ?tag=&lt;code&gt;
+        </code>
+        . Leave blank to disable.
+      </p>
+      <div>
+        <Label htmlFor="aff-code">Affiliate Tag</Label>
+        <Input
+          id="aff-code"
+          data-ocid="admin.affiliate_code_input"
+          value={code}
+          onChange={(e) => setCode(e.target.value)}
+          placeholder="mysite-20"
+          className="max-w-xs"
+        />
+      </div>
+      <Button
+        type="submit"
+        disabled={setCodeMutation.isPending}
+        data-ocid="admin.affiliate_code_save_button"
+        className="gap-2"
+      >
+        {setCodeMutation.isPending ? (
+          <Loader2 className="w-4 h-4 animate-spin" />
+        ) : (
+          <Save className="w-4 h-4" />
+        )}
+        Save Code
+      </Button>
+    </form>
+  );
+}
+
+// ── Marketplace Admin Tab ──────────────────────────────────────────────────────
+
+function listingStatusBadge(status: SellerListingStatus) {
+  const map: Record<string, { label: string; className: string }> = {
+    pending: {
+      label: "Pending",
+      className: "bg-amber-500/20 text-amber-400 border-amber-500/30",
+    },
+    approved: {
+      label: "Approved",
+      className: "bg-emerald-500/20 text-emerald-400 border-emerald-500/30",
+    },
+    rejected: {
+      label: "Rejected",
+      className: "bg-red-500/20 text-red-400 border-red-500/30",
+    },
+  };
+  const cfg = map[status as string] ?? map.pending;
+  return (
+    <span
+      className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold border ${cfg.className}`}
+    >
+      {cfg.label}
+    </span>
+  );
+}
+
+function MarketplaceAdminTab() {
+  const { data: pendingListings = [], isLoading: loadingPending } =
+    usePendingSellerListings();
+  const { data: allListings = [], isLoading: loadingAll } =
+    useAllSellerListingsAdmin();
+  const updateStatusMutation = useUpdateSellerListingStatus();
+
+  const handleStatus = async (id: bigint, status: SellerListingStatus) => {
+    try {
+      await updateStatusMutation.mutateAsync({ id, status });
+      toast.success(
+        `Listing ${status === "approved" ? "approved" : "rejected"}`,
+      );
+    } catch {
+      toast.error("Failed to update status");
+    }
+  };
+
+  return (
+    <div className="space-y-8">
+      {/* Pending */}
+      <div>
+        <h3 className="font-heading font-semibold text-base mb-3 flex items-center gap-2">
+          Pending Review
+          {pendingListings.length > 0 && (
+            <Badge className="bg-amber-500/20 text-amber-400 border-amber-500/30 text-xs">
+              {pendingListings.length}
+            </Badge>
+          )}
+        </h3>
+        <div className="rounded-lg border overflow-auto">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Product</TableHead>
+                <TableHead>Category</TableHead>
+                <TableHead>Retail Price</TableHead>
+                <TableHead>Seller ID</TableHead>
+                <TableHead>Submitted</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {loadingPending ? (
+                <TableRow>
+                  <TableCell
+                    colSpan={6}
+                    className="text-center py-8 text-muted-foreground"
+                  >
+                    <Loader2 className="w-5 h-5 animate-spin inline mr-2" />
+                    Loading…
+                  </TableCell>
+                </TableRow>
+              ) : pendingListings.length === 0 ? (
+                <TableRow>
+                  <TableCell
+                    colSpan={6}
+                    className="text-center py-8 text-muted-foreground"
+                  >
+                    No pending listings. All caught up! ✓
+                  </TableCell>
+                </TableRow>
+              ) : (
+                pendingListings.map((listing, idx) => (
+                  <TableRow key={listing.id.toString()}>
+                    <TableCell>
+                      <div className="flex items-center gap-2">
+                        <img
+                          src={listing.imageUrl}
+                          alt={listing.title}
+                          className="w-9 h-9 rounded object-cover bg-muted border shrink-0"
+                          onError={(e) => {
+                            (e.target as HTMLImageElement).src =
+                              `https://picsum.photos/seed/${listing.id}/60/60`;
+                          }}
+                        />
+                        <p className="text-sm font-medium line-clamp-1 max-w-[140px]">
+                          {listing.title}
+                        </p>
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-sm">
+                      {listing.category}
+                    </TableCell>
+                    <TableCell className="text-sm font-semibold text-primary">
+                      {formatPrice(listing.price * 1.5)}
+                    </TableCell>
+                    <TableCell className="text-xs text-muted-foreground font-mono">
+                      {listing.sellerId.toString().slice(0, 12)}…
+                    </TableCell>
+                    <TableCell className="text-xs text-muted-foreground">
+                      {new Date(
+                        Number(listing.createdAt) / 1_000_000,
+                      ).toLocaleDateString()}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <div className="flex items-center justify-end gap-1">
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          data-ocid={`admin.listing.approve_button.${idx + 1}`}
+                          className="text-emerald-500 hover:text-emerald-400 hover:bg-emerald-500/10 gap-1 text-xs"
+                          disabled={updateStatusMutation.isPending}
+                          onClick={() =>
+                            void handleStatus(
+                              listing.id,
+                              "approved" as SellerListingStatus,
+                            )
+                          }
+                        >
+                          <Check className="w-3.5 h-3.5" />
+                          Approve
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          data-ocid={`admin.listing.reject_button.${idx + 1}`}
+                          className="text-destructive hover:text-destructive hover:bg-destructive/10 gap-1 text-xs"
+                          disabled={updateStatusMutation.isPending}
+                          onClick={() =>
+                            void handleStatus(
+                              listing.id,
+                              "rejected" as SellerListingStatus,
+                            )
+                          }
+                        >
+                          <X className="w-3.5 h-3.5" />
+                          Reject
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
+            </TableBody>
+          </Table>
+        </div>
+      </div>
+
+      {/* All listings */}
+      <div>
+        <h3 className="font-heading font-semibold text-base mb-3">
+          All Listings ({allListings.length})
+        </h3>
+        <div className="rounded-lg border overflow-auto">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Product</TableHead>
+                <TableHead>Category</TableHead>
+                <TableHead>Retail Price</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead>Submitted</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {loadingAll ? (
+                <TableRow>
+                  <TableCell
+                    colSpan={5}
+                    className="text-center py-8 text-muted-foreground"
+                  >
+                    <Loader2 className="w-5 h-5 animate-spin inline mr-2" />
+                    Loading…
+                  </TableCell>
+                </TableRow>
+              ) : allListings.length === 0 ? (
+                <TableRow>
+                  <TableCell
+                    colSpan={5}
+                    className="text-center py-8 text-muted-foreground"
+                  >
+                    No listings yet.
+                  </TableCell>
+                </TableRow>
+              ) : (
+                allListings.map((listing) => (
+                  <TableRow key={listing.id.toString()}>
+                    <TableCell>
+                      <div className="flex items-center gap-2">
+                        <img
+                          src={listing.imageUrl}
+                          alt={listing.title}
+                          className="w-9 h-9 rounded object-cover bg-muted border shrink-0"
+                          onError={(e) => {
+                            (e.target as HTMLImageElement).src =
+                              `https://picsum.photos/seed/${listing.id}/60/60`;
+                          }}
+                        />
+                        <p className="text-sm font-medium line-clamp-1 max-w-[140px]">
+                          {listing.title}
+                        </p>
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-sm">
+                      {listing.category}
+                    </TableCell>
+                    <TableCell className="text-sm font-semibold text-primary">
+                      {formatPrice(listing.price * 1.5)}
+                    </TableCell>
+                    <TableCell>{listingStatusBadge(listing.status)}</TableCell>
+                    <TableCell className="text-xs text-muted-foreground">
+                      {new Date(
+                        Number(listing.createdAt) / 1_000_000,
+                      ).toLocaleDateString()}
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
+            </TableBody>
+          </Table>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ── Main Admin Page ────────────────────────────────────────────────────────────
 
 export default function AdminPage() {
@@ -1011,7 +1328,7 @@ export default function AdminPage() {
       </div>
 
       <Tabs defaultValue="products" className="space-y-6">
-        <TabsList className="bg-muted">
+        <TabsList className="bg-muted flex-wrap h-auto gap-1">
           <TabsTrigger value="products" data-ocid="admin.products_tab">
             Products
           </TabsTrigger>
@@ -1020,6 +1337,12 @@ export default function AdminPage() {
           </TabsTrigger>
           <TabsTrigger value="social" data-ocid="admin.social_links_tab">
             Social Links
+          </TabsTrigger>
+          <TabsTrigger value="affiliate" data-ocid="admin.affiliate_code_tab">
+            Affiliate Code
+          </TabsTrigger>
+          <TabsTrigger value="marketplace" data-ocid="admin.marketplace_tab">
+            Marketplace
           </TabsTrigger>
         </TabsList>
 
@@ -1031,6 +1354,12 @@ export default function AdminPage() {
         </TabsContent>
         <TabsContent value="social">
           <SocialLinksTab />
+        </TabsContent>
+        <TabsContent value="affiliate">
+          <AffiliateCodeTab />
+        </TabsContent>
+        <TabsContent value="marketplace">
+          <MarketplaceAdminTab />
         </TabsContent>
       </Tabs>
     </main>

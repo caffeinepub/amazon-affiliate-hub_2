@@ -19,11 +19,11 @@ export default function Footer() {
   return (
     <footer className="bg-secondary text-secondary-foreground mt-16">
       <div className="container mx-auto px-4 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-10">
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-8 mb-10">
           {/* Brand */}
-          <div className="md:col-span-1">
+          <div className="md:col-span-2">
             <h3 className="font-display font-bold text-lg text-primary mb-2">
-              AffiliateHub
+              Morgensegen Products
             </h3>
             <p className="text-sm text-secondary-foreground/60 leading-relaxed">
               Your trusted source for top deals from Amazon, AliExpress, and
@@ -66,6 +66,22 @@ export default function Footer() {
                   Home & Kitchen
                 </a>
               </li>
+              <li>
+                <a
+                  href="/affiliate/amazon-india"
+                  className="hover:text-primary transition-colors"
+                >
+                  Amazon India Affiliate
+                </a>
+              </li>
+              <li>
+                <a
+                  href="/affiliate/amazon-global"
+                  className="hover:text-primary transition-colors"
+                >
+                  Amazon Global Affiliate
+                </a>
+              </li>
             </ul>
           </div>
 
@@ -105,6 +121,43 @@ export default function Footer() {
                   className="hover:text-primary transition-colors"
                 >
                   Beauty
+                </a>
+              </li>
+            </ul>
+          </div>
+
+          {/* Contact */}
+          <div>
+            <h4 className="font-semibold text-sm mb-3 text-secondary-foreground/80">
+              Contact Us
+            </h4>
+            <ul className="space-y-2 text-sm text-secondary-foreground/60">
+              <li>
+                <a
+                  href="mailto:nishantshandilya060@gmail.com"
+                  className="hover:text-primary transition-colors break-all"
+                >
+                  nishantshandilya060@gmail.com
+                </a>
+              </li>
+              <li>
+                <a
+                  href="https://chat.whatsapp.com/JDPnQgxp6Nj5CVo8plCtFy?mode=gi_t"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:text-primary transition-colors"
+                >
+                  WhatsApp Group
+                </a>
+              </li>
+              <li>
+                <a
+                  href="https://t.me/+GMRRNBZRDz4yNzJl"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:text-primary transition-colors"
+                >
+                  Telegram Channel
                 </a>
               </li>
             </ul>
@@ -196,7 +249,7 @@ export default function Footer() {
         </div>
 
         <div className="border-t border-white/10 pt-6 flex flex-col md:flex-row items-center justify-between gap-2 text-xs text-secondary-foreground/50">
-          <p>© {year} AffiliateHub. All rights reserved.</p>
+          <p>© {year} Morgensegen Products. All rights reserved.</p>
           <p className="flex items-center gap-1">
             Built with <Heart className="w-3 h-3 text-primary fill-primary" />{" "}
             using{" "}

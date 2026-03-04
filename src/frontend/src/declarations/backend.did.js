@@ -13,6 +13,35 @@ export const UserRole = IDL.Variant({
   'user' : IDL.Null,
   'guest' : IDL.Null,
 });
+export const SellerListingStatus = IDL.Variant({
+  'pending' : IDL.Null,
+  'approved' : IDL.Null,
+  'rejected' : IDL.Null,
+});
+export const SellerListing = IDL.Record({
+  'id' : IDL.Nat,
+  'status' : SellerListingStatus,
+  'title' : IDL.Text,
+  'createdAt' : IDL.Int,
+  'description' : IDL.Text,
+  'imageUrl' : IDL.Text,
+  'shippingInfo' : IDL.Text,
+  'contactEmail' : IDL.Text,
+  'category' : IDL.Text,
+  'commissionRate' : IDL.Float64,
+  'sellerId' : IDL.Principal,
+  'contactWhatsApp' : IDL.Text,
+  'price' : IDL.Float64,
+});
+export const SellerProfile = IDL.Record({
+  'createdAt' : IDL.Int,
+  'description' : IDL.Text,
+  'logoUrl' : IDL.Text,
+  'storeName' : IDL.Text,
+  'contactEmail' : IDL.Text,
+  'sellerId' : IDL.Principal,
+  'contactWhatsApp' : IDL.Text,
+});
 export const Brand = IDL.Record({
   'id' : IDL.Nat,
   'name' : IDL.Text,
@@ -70,14 +99,40 @@ export const idlService = IDL.Service({
   'assignCallerUserRole' : IDL.Func([IDL.Principal, UserRole], [], []),
   'deleteBrand' : IDL.Func([IDL.Nat], [IDL.Bool], []),
   'deleteProduct' : IDL.Func([IDL.Nat], [IDL.Bool], []),
+  'deleteSellerListing' : IDL.Func([IDL.Nat], [IDL.Bool], []),
+  'getAffiliateCode' : IDL.Func([], [IDL.Text], ['query']),
+  'getAllSellerListingsAdmin' : IDL.Func(
+      [],
+      [IDL.Vec(SellerListing)],
+      ['query'],
+    ),
+  'getAllSellerProfiles' : IDL.Func([], [IDL.Vec(SellerProfile)], ['query']),
   'getBrands' : IDL.Func([], [IDL.Vec(Brand)], ['query']),
   'getCallerUserProfile' : IDL.Func([], [IDL.Opt(UserProfile)], ['query']),
   'getCallerUserRole' : IDL.Func([], [UserRole], ['query']),
   'getDealOfDay' : IDL.Func([], [IDL.Vec(Product)], ['query']),
   'getFeaturedProducts' : IDL.Func([], [IDL.Vec(Product)], ['query']),
+  'getMySellerListings' : IDL.Func([], [IDL.Vec(SellerListing)], ['query']),
+  'getMySellerProfile' : IDL.Func([], [IDL.Opt(SellerProfile)], ['query']),
+  'getPendingSellerListings' : IDL.Func(
+      [],
+      [IDL.Vec(SellerListing)],
+      ['query'],
+    ),
   'getProductById' : IDL.Func([IDL.Nat], [IDL.Opt(Product)], ['query']),
   'getProducts' : IDL.Func([], [IDL.Vec(Product)], ['query']),
   'getProductsByCategory' : IDL.Func([IDL.Text], [IDL.Vec(Product)], ['query']),
+  'getSellerListingById' : IDL.Func(
+      [IDL.Nat],
+      [IDL.Opt(SellerListing)],
+      ['query'],
+    ),
+  'getSellerListings' : IDL.Func([], [IDL.Vec(SellerListing)], ['query']),
+  'getSellerProfile' : IDL.Func(
+      [IDL.Principal],
+      [IDL.Opt(SellerProfile)],
+      ['query'],
+    ),
   'getSocialLinks' : IDL.Func([], [SocialLinks], ['query']),
   'getUserProfile' : IDL.Func(
       [IDL.Principal],
@@ -85,9 +140,29 @@ export const idlService = IDL.Service({
       ['query'],
     ),
   'isCallerAdmin' : IDL.Func([], [IDL.Bool], ['query']),
+  'registerSellerProfile' : IDL.Func(
+      [IDL.Text, IDL.Text, IDL.Text, IDL.Text, IDL.Text],
+      [],
+      [],
+    ),
   'saveCallerUserProfile' : IDL.Func([UserProfile], [], []),
+  'setAffiliateCode' : IDL.Func([IDL.Text], [IDL.Bool], []),
   'setDealOfDay' : IDL.Func([IDL.Nat, IDL.Bool], [IDL.Bool], []),
   'setFeatured' : IDL.Func([IDL.Nat, IDL.Bool], [IDL.Bool], []),
+  'submitSellerListing' : IDL.Func(
+      [
+        IDL.Text,
+        IDL.Text,
+        IDL.Text,
+        IDL.Float64,
+        IDL.Text,
+        IDL.Text,
+        IDL.Text,
+        IDL.Text,
+      ],
+      [IDL.Nat],
+      [],
+    ),
   'updateProduct' : IDL.Func(
       [
         IDL.Nat,
@@ -104,6 +179,11 @@ export const idlService = IDL.Service({
       [IDL.Bool],
       [],
     ),
+  'updateSellerListingStatus' : IDL.Func(
+      [IDL.Nat, SellerListingStatus],
+      [IDL.Bool],
+      [],
+    ),
   'updateSocialLinks' : IDL.Func([SocialLinks], [IDL.Bool], []),
 });
 
@@ -114,6 +194,35 @@ export const idlFactory = ({ IDL }) => {
     'admin' : IDL.Null,
     'user' : IDL.Null,
     'guest' : IDL.Null,
+  });
+  const SellerListingStatus = IDL.Variant({
+    'pending' : IDL.Null,
+    'approved' : IDL.Null,
+    'rejected' : IDL.Null,
+  });
+  const SellerListing = IDL.Record({
+    'id' : IDL.Nat,
+    'status' : SellerListingStatus,
+    'title' : IDL.Text,
+    'createdAt' : IDL.Int,
+    'description' : IDL.Text,
+    'imageUrl' : IDL.Text,
+    'shippingInfo' : IDL.Text,
+    'contactEmail' : IDL.Text,
+    'category' : IDL.Text,
+    'commissionRate' : IDL.Float64,
+    'sellerId' : IDL.Principal,
+    'contactWhatsApp' : IDL.Text,
+    'price' : IDL.Float64,
+  });
+  const SellerProfile = IDL.Record({
+    'createdAt' : IDL.Int,
+    'description' : IDL.Text,
+    'logoUrl' : IDL.Text,
+    'storeName' : IDL.Text,
+    'contactEmail' : IDL.Text,
+    'sellerId' : IDL.Principal,
+    'contactWhatsApp' : IDL.Text,
   });
   const Brand = IDL.Record({
     'id' : IDL.Nat,
@@ -172,16 +281,42 @@ export const idlFactory = ({ IDL }) => {
     'assignCallerUserRole' : IDL.Func([IDL.Principal, UserRole], [], []),
     'deleteBrand' : IDL.Func([IDL.Nat], [IDL.Bool], []),
     'deleteProduct' : IDL.Func([IDL.Nat], [IDL.Bool], []),
+    'deleteSellerListing' : IDL.Func([IDL.Nat], [IDL.Bool], []),
+    'getAffiliateCode' : IDL.Func([], [IDL.Text], ['query']),
+    'getAllSellerListingsAdmin' : IDL.Func(
+        [],
+        [IDL.Vec(SellerListing)],
+        ['query'],
+      ),
+    'getAllSellerProfiles' : IDL.Func([], [IDL.Vec(SellerProfile)], ['query']),
     'getBrands' : IDL.Func([], [IDL.Vec(Brand)], ['query']),
     'getCallerUserProfile' : IDL.Func([], [IDL.Opt(UserProfile)], ['query']),
     'getCallerUserRole' : IDL.Func([], [UserRole], ['query']),
     'getDealOfDay' : IDL.Func([], [IDL.Vec(Product)], ['query']),
     'getFeaturedProducts' : IDL.Func([], [IDL.Vec(Product)], ['query']),
+    'getMySellerListings' : IDL.Func([], [IDL.Vec(SellerListing)], ['query']),
+    'getMySellerProfile' : IDL.Func([], [IDL.Opt(SellerProfile)], ['query']),
+    'getPendingSellerListings' : IDL.Func(
+        [],
+        [IDL.Vec(SellerListing)],
+        ['query'],
+      ),
     'getProductById' : IDL.Func([IDL.Nat], [IDL.Opt(Product)], ['query']),
     'getProducts' : IDL.Func([], [IDL.Vec(Product)], ['query']),
     'getProductsByCategory' : IDL.Func(
         [IDL.Text],
         [IDL.Vec(Product)],
+        ['query'],
+      ),
+    'getSellerListingById' : IDL.Func(
+        [IDL.Nat],
+        [IDL.Opt(SellerListing)],
+        ['query'],
+      ),
+    'getSellerListings' : IDL.Func([], [IDL.Vec(SellerListing)], ['query']),
+    'getSellerProfile' : IDL.Func(
+        [IDL.Principal],
+        [IDL.Opt(SellerProfile)],
         ['query'],
       ),
     'getSocialLinks' : IDL.Func([], [SocialLinks], ['query']),
@@ -191,9 +326,29 @@ export const idlFactory = ({ IDL }) => {
         ['query'],
       ),
     'isCallerAdmin' : IDL.Func([], [IDL.Bool], ['query']),
+    'registerSellerProfile' : IDL.Func(
+        [IDL.Text, IDL.Text, IDL.Text, IDL.Text, IDL.Text],
+        [],
+        [],
+      ),
     'saveCallerUserProfile' : IDL.Func([UserProfile], [], []),
+    'setAffiliateCode' : IDL.Func([IDL.Text], [IDL.Bool], []),
     'setDealOfDay' : IDL.Func([IDL.Nat, IDL.Bool], [IDL.Bool], []),
     'setFeatured' : IDL.Func([IDL.Nat, IDL.Bool], [IDL.Bool], []),
+    'submitSellerListing' : IDL.Func(
+        [
+          IDL.Text,
+          IDL.Text,
+          IDL.Text,
+          IDL.Float64,
+          IDL.Text,
+          IDL.Text,
+          IDL.Text,
+          IDL.Text,
+        ],
+        [IDL.Nat],
+        [],
+      ),
     'updateProduct' : IDL.Func(
         [
           IDL.Nat,
@@ -207,6 +362,11 @@ export const idlFactory = ({ IDL }) => {
           IDL.Text,
           IDL.Text,
         ],
+        [IDL.Bool],
+        [],
+      ),
+    'updateSellerListingStatus' : IDL.Func(
+        [IDL.Nat, SellerListingStatus],
         [IDL.Bool],
         [],
       ),

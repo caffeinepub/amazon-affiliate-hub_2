@@ -1,7 +1,21 @@
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Link, useNavigate } from "@tanstack/react-router";
-import { Menu, Search, Shield, ShoppingBag, X } from "lucide-react";
+import {
+  ChevronDown,
+  Globe,
+  Menu,
+  Search,
+  Shield,
+  ShoppingBag,
+  X,
+} from "lucide-react";
 import { useState } from "react";
 import { CATEGORIES } from "../data/seedData";
 import { useIsAdmin } from "../hooks/useQueries";
@@ -53,7 +67,7 @@ export default function NavBar({ onSearch, searchValue = "" }: NavBarProps) {
                 <ShoppingBag className="w-4 h-4 text-primary-foreground" />
               </div>
               <span className="font-display font-bold text-xl text-primary leading-none">
-                AffiliateHub
+                Morgensegen Products
               </span>
             </Link>
 
@@ -81,6 +95,53 @@ export default function NavBar({ onSearch, searchValue = "" }: NavBarProps) {
                   Products
                 </Button>
               </Link>
+              <Link to="/marketplace" data-ocid="nav.marketplace_link">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-secondary-foreground hover:text-primary hover:bg-white/10 gap-1"
+                >
+                  <Globe className="w-3.5 h-3.5" />
+                  Marketplace
+                </Button>
+              </Link>
+              {/* Affiliate dropdown */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    data-ocid="nav.affiliate_link"
+                    className="text-secondary-foreground hover:text-primary hover:bg-white/10 gap-1"
+                  >
+                    Affiliate
+                    <ChevronDown className="w-3 h-3" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="min-w-[180px]">
+                  <DropdownMenuItem asChild>
+                    <Link
+                      to="/affiliate/amazon-india"
+                      data-ocid="nav.affiliate.amazon_india_link"
+                      className="flex items-center gap-2 cursor-pointer"
+                    >
+                      <span className="text-base">🇮🇳</span>
+                      Amazon India
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link
+                      to="/affiliate/amazon-global"
+                      data-ocid="nav.affiliate.amazon_global_link"
+                      className="flex items-center gap-2 cursor-pointer"
+                    >
+                      <span className="text-base">🌍</span>
+                      Amazon Global
+                    </Link>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+
               {isAdmin && (
                 <Link to="/admin" data-ocid="nav.admin_link">
                   <Button
@@ -167,6 +228,45 @@ export default function NavBar({ onSearch, searchValue = "" }: NavBarProps) {
                   className="w-full justify-start text-secondary-foreground hover:text-primary"
                 >
                   All Products
+                </Button>
+              </Link>
+              <Link to="/marketplace" onClick={() => setMobileMenuOpen(false)}>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="w-full justify-start text-secondary-foreground hover:text-primary gap-2"
+                  data-ocid="nav.marketplace_link"
+                >
+                  <Globe className="w-3.5 h-3.5" />
+                  Marketplace
+                </Button>
+              </Link>
+              <Link
+                to="/affiliate/amazon-india"
+                onClick={() => setMobileMenuOpen(false)}
+                data-ocid="nav.affiliate.amazon_india_link"
+              >
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="w-full justify-start text-secondary-foreground hover:text-primary gap-2"
+                >
+                  <span className="text-base leading-none">🇮🇳</span>
+                  Amazon India Affiliate
+                </Button>
+              </Link>
+              <Link
+                to="/affiliate/amazon-global"
+                onClick={() => setMobileMenuOpen(false)}
+                data-ocid="nav.affiliate.amazon_global_link"
+              >
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="w-full justify-start text-secondary-foreground hover:text-primary gap-2"
+                >
+                  <span className="text-base leading-none">🌍</span>
+                  Amazon Global Affiliate
                 </Button>
               </Link>
               {isAdmin && (

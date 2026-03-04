@@ -2,9 +2,12 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Link, useNavigate } from "@tanstack/react-router";
 import {
+  ArrowRight,
   ChevronRight,
   Clock,
   ExternalLink,
+  Globe,
+  Package,
   ShoppingBag,
   Star,
   TrendingUp,
@@ -322,6 +325,88 @@ export default function HomePage() {
               No featured products yet.
             </p>
           )}
+        </section>
+
+        {/* ── Sell With Us CTA ──────────────────────── */}
+        <section
+          data-ocid="home.sell_cta_section"
+          className="rounded-2xl overflow-hidden relative"
+          style={{
+            background:
+              "linear-gradient(135deg, oklch(0.20 0.05 15) 0%, oklch(0.26 0.08 20) 60%, oklch(0.22 0.04 260) 100%)",
+          }}
+        >
+          {/* Decorative blobs */}
+          <div className="absolute top-0 right-0 w-64 h-64 rounded-full bg-rose-600/20 blur-3xl pointer-events-none" />
+          <div className="absolute bottom-0 left-0 w-48 h-48 rounded-full bg-primary/10 blur-2xl pointer-events-none" />
+
+          <div className="relative z-10 p-8 md:p-12">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+              {/* Left: Copy */}
+              <div>
+                <div className="inline-flex items-center gap-2 bg-rose-600/20 border border-rose-500/30 rounded-full px-3 py-1 text-rose-300 text-xs font-medium mb-4">
+                  <Globe className="w-3.5 h-3.5" />
+                  Chinese Sellers Welcome
+                </div>
+                <h2 className="font-display font-extrabold text-3xl md:text-4xl text-white leading-snug mb-4">
+                  Start Selling{" "}
+                  <span className="text-rose-400">Your Products</span> Here
+                </h2>
+                <p className="text-white/70 text-base leading-relaxed mb-6">
+                  List your products directly on our marketplace and reach
+                  buyers worldwide. No upfront fees — we add a platform margin
+                  and handle the marketing.
+                </p>
+                <Link to="/seller">
+                  <Button
+                    data-ocid="home.sell_cta_button"
+                    size="lg"
+                    className="bg-rose-600 hover:bg-rose-700 text-white gap-2 shadow-lg font-semibold"
+                  >
+                    Start Selling
+                    <ArrowRight className="w-5 h-5" />
+                  </Button>
+                </Link>
+              </div>
+
+              {/* Right: Feature grid */}
+              <div className="grid grid-cols-2 gap-4">
+                {[
+                  {
+                    icon: <Package className="w-5 h-5 text-rose-400" />,
+                    title: "List Your Products",
+                    desc: "Submit Chinese products directly to our marketplace for review.",
+                  },
+                  {
+                    icon: <Globe className="w-5 h-5 text-primary" />,
+                    title: "We Handle Marketing",
+                    desc: "Your products get visibility across our global platform.",
+                  },
+                  {
+                    icon: <TrendingUp className="w-5 h-5 text-emerald-400" />,
+                    title: "50% Platform Margin",
+                    desc: "We add margin to your base price — you keep your full amount.",
+                  },
+                  {
+                    icon: <ShoppingBag className="w-5 h-5 text-amber-400" />,
+                    title: "Direct Contact",
+                    desc: "Buyers contact you directly for shipping and payment.",
+                  },
+                ].map((item) => (
+                  <div
+                    key={item.title}
+                    className="bg-white/5 border border-white/10 rounded-xl p-4"
+                  >
+                    <div className="mb-2">{item.icon}</div>
+                    <h4 className="font-heading font-semibold text-sm text-white mb-1">
+                      {item.title}
+                    </h4>
+                    <p className="text-xs text-white/60">{item.desc}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
         </section>
 
         {/* ── Top Brands ─────────────────────────────── */}

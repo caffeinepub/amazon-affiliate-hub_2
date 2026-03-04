@@ -1,32 +1,29 @@
-# Amazon Affiliate Hub
+# Morgensegen Products — Affiliate Program Pages
 
 ## Current State
-Fresh project with no application code. Only base scaffolding exists (frontend shell, no backend Motoko files, no UI components beyond base shadcn setup).
+- Multi-page affiliate + marketplace site with NavBar, Footer, Home, Products, Marketplace, Seller Portal, and Admin pages.
+- Footer has Quick Links and Contact sections.
+- NavBar has Products, Marketplace, and Admin nav links.
 
 ## Requested Changes (Diff)
 
 ### Add
-- **Product data model**: id, title, description, imageUrl, price, category, affiliateLink, rating (0-5), featured (bool), dealOfDay (bool), brand, vendor (amazon | aliexpress | alibaba)
-- **Brand data model**: id, name, logoUrl, category, affiliateLink
-- **Backend CRUD**: addProduct, getProducts, getProductById, updateProduct, deleteProduct, getProductsByCategory, getFeaturedProducts, getDealOfDay, addBrand, getBrands, deleteBrand
-- **Home page**: hero banner, Deal of the Day section, Top Picks / Featured Products grid, Top Brands section
-- **Product listing page**: grid of product cards with category filter sidebar and search bar
-- **Product detail view**: image, title, description, price, rating stars, "Buy on Amazon/AliExpress/Alibaba" CTA button
-- **Category navigation**: Electronics, Home & Kitchen, Books, Clothing, Sports, Beauty, Toys, Chinese Products (AliExpress/Alibaba)
-- **Admin panel** (password-protected): add/edit/delete products; add/delete brands; toggle featured and dealOfDay flags
-- **Social media links section**: Facebook, Twitter, Threads, Instagram, Telegram, WhatsApp links (configurable from admin)
-- **Responsive layout** for mobile and desktop
-- **Sample seed data** with representative products and brands across categories
+- **AmazonAffiliateIndiaPage** (`/affiliate/amazon-india`): A dedicated page for Amazon India Affiliate Program linking out to https://affiliate-program.amazon.in/home. Should include program highlights, benefits, how-to-join steps, and a prominent CTA button that opens the link in a new tab.
+- **AmazonAffiliateGlobalPage** (`/affiliate/amazon-global`): A dedicated page for Amazon Associates (Global / US) linking out to https://affiliate-program.amazon.com/. Same structure — program highlights, benefits, how-to-join steps, and a prominent CTA button that opens the link in a new tab.
+- **Affiliate nav link** in NavBar (desktop + mobile) with a dropdown or dedicated link labelled "Affiliate" that links to both pages.
+- **Affiliate section in Footer** Quick Links column with links to both pages.
 
 ### Modify
-- Nothing (new project)
+- `App.tsx`: Add two new routes (`/affiliate/amazon-india` and `/affiliate/amazon-global`).
+- `NavBar.tsx`: Add "Affiliate" nav entry with links to both affiliate pages (desktop nav and mobile menu).
+- `Footer.tsx`: Add links to both affiliate pages in the Quick Links section.
 
 ### Remove
-- Nothing
+- Nothing removed.
 
 ## Implementation Plan
-1. Generate Motoko backend with Product and Brand data models plus all CRUD operations; include social links config storage
-2. Select authorization component for admin panel protection
-3. Build frontend: navigation bar, home page, product listing page, product detail modal, admin panel, footer with social links
-4. Seed sample products and brands in the frontend layer
-5. Deploy
+1. Create `src/pages/AffiliateAmazonIndiaPage.tsx` — page for Amazon.in affiliate program.
+2. Create `src/pages/AffiliateAmazonGlobalPage.tsx` — page for Amazon.com affiliate program.
+3. Update `App.tsx` to import and register both new routes.
+4. Update `NavBar.tsx` to add "Affiliate" links in desktop nav and mobile menu.
+5. Update `Footer.tsx` to add both affiliate pages in Quick Links.

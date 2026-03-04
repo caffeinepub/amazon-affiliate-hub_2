@@ -336,3 +336,231 @@ export function useUpdateSocialLinks() {
     },
   });
 }
+
+// ── Seller Listings ───────────────────────────────────────────────────────────
+
+export function useSellerListings() {
+  const { actor, isFetching } = useActor();
+  return useQuery<import("../backend").SellerListing[]>({
+    queryKey: ["sellerListings"],
+    queryFn: async () => {
+      if (!actor) return [];
+      try {
+        return await actor.getSellerListings();
+      } catch {
+        return [];
+      }
+    },
+    enabled: !isFetching,
+    placeholderData: [],
+  });
+}
+
+export function useMySellerListings() {
+  const { actor, isFetching } = useActor();
+  return useQuery<import("../backend").SellerListing[]>({
+    queryKey: ["mySellerListings"],
+    queryFn: async () => {
+      if (!actor) return [];
+      try {
+        return await actor.getMySellerListings();
+      } catch {
+        return [];
+      }
+    },
+    enabled: !!actor && !isFetching,
+  });
+}
+
+export function useAllSellerListingsAdmin() {
+  const { actor, isFetching } = useActor();
+  return useQuery<import("../backend").SellerListing[]>({
+    queryKey: ["allSellerListings"],
+    queryFn: async () => {
+      if (!actor) return [];
+      try {
+        return await actor.getAllSellerListingsAdmin();
+      } catch {
+        return [];
+      }
+    },
+    enabled: !!actor && !isFetching,
+  });
+}
+
+export function usePendingSellerListings() {
+  const { actor, isFetching } = useActor();
+  return useQuery<import("../backend").SellerListing[]>({
+    queryKey: ["pendingSellerListings"],
+    queryFn: async () => {
+      if (!actor) return [];
+      try {
+        return await actor.getPendingSellerListings();
+      } catch {
+        return [];
+      }
+    },
+    enabled: !!actor && !isFetching,
+  });
+}
+
+export function useSellerListingById(id: bigint | null) {
+  const { actor, isFetching } = useActor();
+  return useQuery<import("../backend").SellerListing | null>({
+    queryKey: ["sellerListing", id?.toString()],
+    queryFn: async () => {
+      if (!id || !actor) return null;
+      try {
+        return await actor.getSellerListingById(id);
+      } catch {
+        return null;
+      }
+    },
+    enabled: !!id && !isFetching,
+  });
+}
+
+export function useMySellerProfile() {
+  const { actor, isFetching } = useActor();
+  return useQuery<import("../backend").SellerProfile | null>({
+    queryKey: ["mySellerProfile"],
+    queryFn: async () => {
+      if (!actor) return null;
+      try {
+        return await actor.getMySellerProfile();
+      } catch {
+        return null;
+      }
+    },
+    enabled: !!actor && !isFetching,
+  });
+}
+
+export function useAffiliateCode() {
+  const { actor, isFetching } = useActor();
+  return useQuery<string>({
+    queryKey: ["affiliateCode"],
+    queryFn: async () => {
+      if (!actor) return "";
+      try {
+        return await actor.getAffiliateCode();
+      } catch {
+        return "";
+      }
+    },
+    enabled: !isFetching,
+    placeholderData: "",
+  });
+}
+
+export function useSubmitSellerListing() {
+  const { actor } = useActor();
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (data: {
+      title: string;
+      description: string;
+      imageUrl: string;
+      price: number;
+      category: string;
+      shippingInfo: string;
+      contactEmail: string;
+      contactWhatsApp: string;
+    }) => {
+      if (!actor) throw new Error("Not connected");
+      return actor.submitSellerListing(
+        data.title,
+        data.description,
+        data.imageUrl,
+        data.price,
+        data.category,
+        data.shippingInfo,
+        data.contactEmail,
+        data.contactWhatsApp,
+      );
+    },
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: ["sellerListings"] });
+      void qc.invalidateQueries({ queryKey: ["mySellerListings"] });
+    },
+  });
+}
+
+export function useUpdateSellerListingStatus() {
+  const { actor } = useActor();
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({
+      id,
+      status,
+    }: {
+      id: bigint;
+      status: import("../backend").SellerListingStatus;
+    }) => {
+      if (!actor) throw new Error("Not connected");
+      return actor.updateSellerListingStatus(id, status);
+    },
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: ["sellerListings"] });
+      void qc.invalidateQueries({ queryKey: ["allSellerListings"] });
+      void qc.invalidateQueries({ queryKey: ["pendingSellerListings"] });
+    },
+  });
+}
+
+export function useDeleteSellerListing() {
+  const { actor } = useActor();
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: bigint) => {
+      if (!actor) throw new Error("Not connected");
+      return actor.deleteSellerListing(id);
+    },
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: ["sellerListings"] });
+      void qc.invalidateQueries({ queryKey: ["mySellerListings"] });
+      void qc.invalidateQueries({ queryKey: ["allSellerListings"] });
+      void qc.invalidateQueries({ queryKey: ["pendingSellerListings"] });
+    },
+  });
+}
+
+export function useRegisterSellerProfile() {
+  const { actor } = useActor();
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (data: {
+      storeName: string;
+      description: string;
+      contactEmail: string;
+      contactWhatsApp: string;
+      logoUrl: string;
+    }) => {
+      if (!actor) throw new Error("Not connected");
+      return actor.registerSellerProfile(
+        data.storeName,
+        data.description,
+        data.contactEmail,
+        data.contactWhatsApp,
+        data.logoUrl,
+      );
+    },
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: ["mySellerProfile"] });
+    },
+  });
+}
+
+export function useSetAffiliateCode() {
+  const { actor } = useActor();
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (code: string) => {
+      if (!actor) throw new Error("Not connected");
+      return actor.setAffiliateCode(code);
+    },
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: ["affiliateCode"] });
+    },
+  });
+}

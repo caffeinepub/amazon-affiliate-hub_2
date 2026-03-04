@@ -259,8 +259,8 @@ export const SEED_SOCIAL_LINKS: SocialLinks = {
   twitter: "#",
   threads: "#",
   instagram: "#",
-  telegram: "#",
-  whatsapp: "#",
+  telegram: "https://t.me/+GMRRNBZRDz4yNzJl",
+  whatsapp: "https://chat.whatsapp.com/JDPnQgxp6Nj5CVo8plCtFy?mode=gi_t",
 };
 
 export const CATEGORIES = [

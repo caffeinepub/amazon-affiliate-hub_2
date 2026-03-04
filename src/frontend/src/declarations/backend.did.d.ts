@@ -32,6 +32,33 @@ export interface Product {
   'affiliateLink' : string,
   'price' : number,
 }
+export interface SellerListing {
+  'id' : bigint,
+  'status' : SellerListingStatus,
+  'title' : string,
+  'createdAt' : bigint,
+  'description' : string,
+  'imageUrl' : string,
+  'shippingInfo' : string,
+  'contactEmail' : string,
+  'category' : string,
+  'commissionRate' : number,
+  'sellerId' : Principal,
+  'contactWhatsApp' : string,
+  'price' : number,
+}
+export type SellerListingStatus = { 'pending' : null } |
+  { 'approved' : null } |
+  { 'rejected' : null };
+export interface SellerProfile {
+  'createdAt' : bigint,
+  'description' : string,
+  'logoUrl' : string,
+  'storeName' : string,
+  'contactEmail' : string,
+  'sellerId' : Principal,
+  'contactWhatsApp' : string,
+}
 export interface SocialLinks {
   'twitter' : string,
   'instagram' : string,
@@ -54,20 +81,39 @@ export interface _SERVICE {
   'assignCallerUserRole' : ActorMethod<[Principal, UserRole], undefined>,
   'deleteBrand' : ActorMethod<[bigint], boolean>,
   'deleteProduct' : ActorMethod<[bigint], boolean>,
+  'deleteSellerListing' : ActorMethod<[bigint], boolean>,
+  'getAffiliateCode' : ActorMethod<[], string>,
+  'getAllSellerListingsAdmin' : ActorMethod<[], Array<SellerListing>>,
+  'getAllSellerProfiles' : ActorMethod<[], Array<SellerProfile>>,
   'getBrands' : ActorMethod<[], Array<Brand>>,
   'getCallerUserProfile' : ActorMethod<[], [] | [UserProfile]>,
   'getCallerUserRole' : ActorMethod<[], UserRole>,
   'getDealOfDay' : ActorMethod<[], Array<Product>>,
   'getFeaturedProducts' : ActorMethod<[], Array<Product>>,
+  'getMySellerListings' : ActorMethod<[], Array<SellerListing>>,
+  'getMySellerProfile' : ActorMethod<[], [] | [SellerProfile]>,
+  'getPendingSellerListings' : ActorMethod<[], Array<SellerListing>>,
   'getProductById' : ActorMethod<[bigint], [] | [Product]>,
   'getProducts' : ActorMethod<[], Array<Product>>,
   'getProductsByCategory' : ActorMethod<[string], Array<Product>>,
+  'getSellerListingById' : ActorMethod<[bigint], [] | [SellerListing]>,
+  'getSellerListings' : ActorMethod<[], Array<SellerListing>>,
+  'getSellerProfile' : ActorMethod<[Principal], [] | [SellerProfile]>,
   'getSocialLinks' : ActorMethod<[], SocialLinks>,
   'getUserProfile' : ActorMethod<[Principal], [] | [UserProfile]>,
   'isCallerAdmin' : ActorMethod<[], boolean>,
+  'registerSellerProfile' : ActorMethod<
+    [string, string, string, string, string],
+    undefined
+  >,
   'saveCallerUserProfile' : ActorMethod<[UserProfile], undefined>,
+  'setAffiliateCode' : ActorMethod<[string], boolean>,
   'setDealOfDay' : ActorMethod<[bigint, boolean], boolean>,
   'setFeatured' : ActorMethod<[bigint, boolean], boolean>,
+  'submitSellerListing' : ActorMethod<
+    [string, string, string, number, string, string, string, string],
+    bigint
+  >,
   'updateProduct' : ActorMethod<
     [
       bigint,
@@ -81,6 +127,10 @@ export interface _SERVICE {
       string,
       string,
     ],
+    boolean
+  >,
+  'updateSellerListingStatus' : ActorMethod<
+    [bigint, SellerListingStatus],
     boolean
   >,
   'updateSocialLinks' : ActorMethod<[SocialLinks], boolean>,
