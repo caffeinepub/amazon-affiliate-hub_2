@@ -13,6 +13,34 @@ export const UserRole = IDL.Variant({
   'user' : IDL.Null,
   'guest' : IDL.Null,
 });
+export const OrderStatus = IDL.Variant({
+  'shipped' : IDL.Null,
+  'forwarded' : IDL.Null,
+  'cancelled' : IDL.Null,
+  'pending' : IDL.Null,
+  'delivered' : IDL.Null,
+});
+export const OrderType = IDL.Variant({
+  'marketplace' : IDL.Null,
+  'affiliate' : IDL.Null,
+});
+export const Order = IDL.Record({
+  'id' : IDL.Nat,
+  'customerName' : IDL.Text,
+  'status' : OrderStatus,
+  'productTitle' : IDL.Text,
+  'customerPhone' : IDL.Text,
+  'sellerListingId' : IDL.Opt(IDL.Nat),
+  'createdAt' : IDL.Int,
+  'sellingPrice' : IDL.Float64,
+  'productId' : IDL.Nat,
+  'orderType' : OrderType,
+  'updatedAt' : IDL.Int,
+  'customerAddress' : IDL.Text,
+  'quantity' : IDL.Nat,
+  'customerId' : IDL.Principal,
+  'customerEmail' : IDL.Text,
+});
 export const SellerListingStatus = IDL.Variant({
   'pending' : IDL.Null,
   'approved' : IDL.Null,
@@ -101,6 +129,7 @@ export const idlService = IDL.Service({
   'deleteProduct' : IDL.Func([IDL.Nat], [IDL.Bool], []),
   'deleteSellerListing' : IDL.Func([IDL.Nat], [IDL.Bool], []),
   'getAffiliateCode' : IDL.Func([], [IDL.Text], ['query']),
+  'getAllOrdersAdmin' : IDL.Func([], [IDL.Vec(Order)], ['query']),
   'getAllSellerListingsAdmin' : IDL.Func(
       [],
       [IDL.Vec(SellerListing)],
@@ -112,8 +141,11 @@ export const idlService = IDL.Service({
   'getCallerUserRole' : IDL.Func([], [UserRole], ['query']),
   'getDealOfDay' : IDL.Func([], [IDL.Vec(Product)], ['query']),
   'getFeaturedProducts' : IDL.Func([], [IDL.Vec(Product)], ['query']),
+  'getMyOrders' : IDL.Func([], [IDL.Vec(Order)], ['query']),
   'getMySellerListings' : IDL.Func([], [IDL.Vec(SellerListing)], ['query']),
   'getMySellerProfile' : IDL.Func([], [IDL.Opt(SellerProfile)], ['query']),
+  'getOrderById' : IDL.Func([IDL.Nat], [IDL.Opt(Order)], ['query']),
+  'getOrdersByStatus' : IDL.Func([OrderStatus], [IDL.Vec(Order)], ['query']),
   'getPendingSellerListings' : IDL.Func(
       [],
       [IDL.Vec(SellerListing)],
@@ -140,6 +172,22 @@ export const idlService = IDL.Service({
       ['query'],
     ),
   'isCallerAdmin' : IDL.Func([], [IDL.Bool], ['query']),
+  'placeOrder' : IDL.Func(
+      [
+        IDL.Text,
+        IDL.Text,
+        IDL.Text,
+        IDL.Text,
+        IDL.Nat,
+        IDL.Text,
+        OrderType,
+        IDL.Opt(IDL.Nat),
+        IDL.Nat,
+        IDL.Float64,
+      ],
+      [IDL.Nat],
+      [],
+    ),
   'registerSellerProfile' : IDL.Func(
       [IDL.Text, IDL.Text, IDL.Text, IDL.Text, IDL.Text],
       [],
@@ -163,6 +211,7 @@ export const idlService = IDL.Service({
       [IDL.Nat],
       [],
     ),
+  'updateOrderStatus' : IDL.Func([IDL.Nat, OrderStatus], [IDL.Bool], []),
   'updateProduct' : IDL.Func(
       [
         IDL.Nat,
@@ -194,6 +243,34 @@ export const idlFactory = ({ IDL }) => {
     'admin' : IDL.Null,
     'user' : IDL.Null,
     'guest' : IDL.Null,
+  });
+  const OrderStatus = IDL.Variant({
+    'shipped' : IDL.Null,
+    'forwarded' : IDL.Null,
+    'cancelled' : IDL.Null,
+    'pending' : IDL.Null,
+    'delivered' : IDL.Null,
+  });
+  const OrderType = IDL.Variant({
+    'marketplace' : IDL.Null,
+    'affiliate' : IDL.Null,
+  });
+  const Order = IDL.Record({
+    'id' : IDL.Nat,
+    'customerName' : IDL.Text,
+    'status' : OrderStatus,
+    'productTitle' : IDL.Text,
+    'customerPhone' : IDL.Text,
+    'sellerListingId' : IDL.Opt(IDL.Nat),
+    'createdAt' : IDL.Int,
+    'sellingPrice' : IDL.Float64,
+    'productId' : IDL.Nat,
+    'orderType' : OrderType,
+    'updatedAt' : IDL.Int,
+    'customerAddress' : IDL.Text,
+    'quantity' : IDL.Nat,
+    'customerId' : IDL.Principal,
+    'customerEmail' : IDL.Text,
   });
   const SellerListingStatus = IDL.Variant({
     'pending' : IDL.Null,
@@ -283,6 +360,7 @@ export const idlFactory = ({ IDL }) => {
     'deleteProduct' : IDL.Func([IDL.Nat], [IDL.Bool], []),
     'deleteSellerListing' : IDL.Func([IDL.Nat], [IDL.Bool], []),
     'getAffiliateCode' : IDL.Func([], [IDL.Text], ['query']),
+    'getAllOrdersAdmin' : IDL.Func([], [IDL.Vec(Order)], ['query']),
     'getAllSellerListingsAdmin' : IDL.Func(
         [],
         [IDL.Vec(SellerListing)],
@@ -294,8 +372,11 @@ export const idlFactory = ({ IDL }) => {
     'getCallerUserRole' : IDL.Func([], [UserRole], ['query']),
     'getDealOfDay' : IDL.Func([], [IDL.Vec(Product)], ['query']),
     'getFeaturedProducts' : IDL.Func([], [IDL.Vec(Product)], ['query']),
+    'getMyOrders' : IDL.Func([], [IDL.Vec(Order)], ['query']),
     'getMySellerListings' : IDL.Func([], [IDL.Vec(SellerListing)], ['query']),
     'getMySellerProfile' : IDL.Func([], [IDL.Opt(SellerProfile)], ['query']),
+    'getOrderById' : IDL.Func([IDL.Nat], [IDL.Opt(Order)], ['query']),
+    'getOrdersByStatus' : IDL.Func([OrderStatus], [IDL.Vec(Order)], ['query']),
     'getPendingSellerListings' : IDL.Func(
         [],
         [IDL.Vec(SellerListing)],
@@ -326,6 +407,22 @@ export const idlFactory = ({ IDL }) => {
         ['query'],
       ),
     'isCallerAdmin' : IDL.Func([], [IDL.Bool], ['query']),
+    'placeOrder' : IDL.Func(
+        [
+          IDL.Text,
+          IDL.Text,
+          IDL.Text,
+          IDL.Text,
+          IDL.Nat,
+          IDL.Text,
+          OrderType,
+          IDL.Opt(IDL.Nat),
+          IDL.Nat,
+          IDL.Float64,
+        ],
+        [IDL.Nat],
+        [],
+      ),
     'registerSellerProfile' : IDL.Func(
         [IDL.Text, IDL.Text, IDL.Text, IDL.Text, IDL.Text],
         [],
@@ -349,6 +446,7 @@ export const idlFactory = ({ IDL }) => {
         [IDL.Nat],
         [],
       ),
+    'updateOrderStatus' : IDL.Func([IDL.Nat, OrderStatus], [IDL.Bool], []),
     'updateProduct' : IDL.Func(
         [
           IDL.Nat,

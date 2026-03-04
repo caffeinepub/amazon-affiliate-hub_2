@@ -6,10 +6,9 @@ import Time "mo:core/Time";
 import Text "mo:core/Text";
 import Runtime "mo:core/Runtime";
 import Principal "mo:core/Principal";
+import Array "mo:core/Array";
 import MixinAuthorization "authorization/MixinAuthorization";
-
 import AccessControl "authorization/access-control";
-
 
 actor {
   public type Product = {
@@ -81,13 +80,49 @@ actor {
     createdAt : Int;
   };
 
+  // Orders types
+  public type OrderStatus = {
+    #pending;
+    #forwarded;
+    #shipped;
+    #delivered;
+    #cancelled;
+  };
+
+  public type OrderType = {
+    #affiliate;
+    #marketplace;
+  };
+
+  public type Order = {
+    id : Nat;
+    customerId : Principal;
+    customerName : Text;
+    customerEmail : Text;
+    customerPhone : Text;
+    customerAddress : Text;
+    productId : Nat;
+    productTitle : Text;
+    orderType : OrderType;
+    sellerListingId : ?Nat;
+    quantity : Nat;
+    sellingPrice : Float;
+    status : OrderStatus;
+    createdAt : Int;
+    updatedAt : Int;
+  };
+
   var productCounter = 0;
   var brandCounter = 0;
   var sellerListingCounter = 0;
+  var orderCounter = 0;
+
   let products = Map.empty<Nat, Product>();
   let brands = Map.empty<Nat, Brand>();
   let sellerListings = Map.empty<Nat, SellerListing>();
   let sellerProfiles = Map.empty<Principal, SellerProfile>();
+  let orders = Map.empty<Nat, Order>();
+
   var socialLinks : SocialLinks = {
     facebook = "";
     twitter = "";
@@ -133,7 +168,7 @@ actor {
     affiliateLink : Text,
     rating : Float,
     brand : Text,
-    vendor : Text
+    vendor : Text,
   ) : async Nat {
     if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
       Runtime.trap("Unauthorized: Only admins can add products");
@@ -176,7 +211,7 @@ actor {
     affiliateLink : Text,
     rating : Float,
     brand : Text,
-    vendor : Text
+    vendor : Text,
   ) : async Bool {
     if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
       Runtime.trap("Unauthorized: Only admins can update products");
@@ -269,7 +304,7 @@ actor {
     name : Text,
     logoUrl : Text,
     category : Text,
-    affiliateLink : Text
+    affiliateLink : Text,
   ) : async Nat {
     if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
       Runtime.trap("Unauthorized: Only admins can add brands");
@@ -330,7 +365,7 @@ actor {
     category : Text,
     shippingInfo : Text,
     contactEmail : Text,
-    contactWhatsApp : Text
+    contactWhatsApp : Text,
   ) : async Nat {
     if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
       Runtime.trap("Unauthorized: Only users can submit seller listings");
@@ -437,7 +472,7 @@ actor {
     description : Text,
     contactEmail : Text,
     contactWhatsApp : Text,
-    logoUrl : Text
+    logoUrl : Text,
   ) : async () {
     if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
       Runtime.trap("Unauthorized: Only users can register seller profiles");
@@ -470,5 +505,115 @@ actor {
       Runtime.trap("Unauthorized: Only admins can get all seller profiles");
     };
     sellerProfiles.values().toArray();
+  };
+
+  // ------------ Orders API ----------------------------------------------------------------------------------------
+
+  public shared ({ caller }) func placeOrder(
+    customerName : Text,
+    customerEmail : Text,
+    customerPhone : Text,
+    customerAddress : Text,
+    productId : Nat,
+    productTitle : Text,
+    orderType : OrderType,
+    sellerListingId : ?Nat,
+    quantity : Nat,
+    sellingPrice : Float,
+  ) : async Nat {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only authenticated users can place orders");
+    };
+
+    orderCounter += 1;
+
+    let newOrder : Order = {
+      id = orderCounter;
+      customerId = caller;
+      customerName;
+      customerEmail;
+      customerPhone;
+      customerAddress;
+      productId;
+      productTitle;
+      orderType;
+      sellerListingId;
+      quantity;
+      sellingPrice;
+      status = #pending;
+      createdAt = Time.now();
+      updatedAt = Time.now();
+    };
+
+    orders.add(orderCounter, newOrder);
+
+    orderCounter;
+  };
+
+  public query ({ caller }) func getMyOrders() : async [Order] {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only authenticated users can view their orders");
+    };
+    let filteredOrders = List.empty<Order>();
+    for ((id, order) in orders.entries()) {
+      if (order.customerId == caller) {
+        filteredOrders.add(order);
+      };
+    };
+    filteredOrders.values().toArray();
+  };
+
+  public query ({ caller }) func getOrderById(id : Nat) : async ?Order {
+    switch (orders.get(id)) {
+      case (null) {
+        null;
+      };
+      case (?order) {
+        if (order.customerId != caller and not AccessControl.isAdmin(accessControlState, caller)) {
+          Runtime.trap("Unauthorized: Only order owner or admin can access order");
+        };
+        ?order;
+      };
+    };
+  };
+
+  public query ({ caller }) func getAllOrdersAdmin() : async [Order] {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
+      Runtime.trap("Unauthorized: Only admins can view all orders");
+    };
+    orders.values().toArray();
+  };
+
+  public shared ({ caller }) func updateOrderStatus(id : Nat, status : OrderStatus) : async Bool {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
+      Runtime.trap("Unauthorized: Only admins can update order status");
+    };
+
+    switch (orders.get(id)) {
+      case (null) { Runtime.trap("Update failed: Order not found for id " # id.toText()) };
+      case (?order) {
+        let updatedOrder : Order = {
+          order with
+          status;
+          updatedAt = Time.now();
+        };
+        orders.add(id, updatedOrder);
+        true;
+      };
+    };
+  };
+
+  public query ({ caller }) func getOrdersByStatus(status : OrderStatus) : async [Order] {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
+      Runtime.trap("Unauthorized: Only admins can view orders by status");
+    };
+
+    let filteredOrders = List.empty<Order>();
+    for ((id, order) in orders.entries()) {
+      if (order.status == status) {
+        filteredOrders.add(order);
+      };
+    };
+    filteredOrders.values().toArray();
   };
 };

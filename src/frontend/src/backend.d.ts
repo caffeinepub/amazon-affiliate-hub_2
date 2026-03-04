@@ -46,6 +46,23 @@ export interface Brand {
     category: string;
     affiliateLink: string;
 }
+export interface Order {
+    id: bigint;
+    customerName: string;
+    status: OrderStatus;
+    productTitle: string;
+    customerPhone: string;
+    sellerListingId?: bigint;
+    createdAt: bigint;
+    sellingPrice: number;
+    productId: bigint;
+    orderType: OrderType;
+    updatedAt: bigint;
+    customerAddress: string;
+    quantity: bigint;
+    customerId: Principal;
+    customerEmail: string;
+}
 export interface Product {
     id: bigint;
     title: string;
@@ -63,6 +80,17 @@ export interface Product {
 }
 export interface UserProfile {
     name: string;
+}
+export enum OrderStatus {
+    shipped = "shipped",
+    forwarded = "forwarded",
+    cancelled = "cancelled",
+    pending = "pending",
+    delivered = "delivered"
+}
+export enum OrderType {
+    marketplace = "marketplace",
+    affiliate = "affiliate"
 }
 export enum SellerListingStatus {
     pending = "pending",
@@ -82,6 +110,7 @@ export interface backendInterface {
     deleteProduct(id: bigint): Promise<boolean>;
     deleteSellerListing(id: bigint): Promise<boolean>;
     getAffiliateCode(): Promise<string>;
+    getAllOrdersAdmin(): Promise<Array<Order>>;
     getAllSellerListingsAdmin(): Promise<Array<SellerListing>>;
     getAllSellerProfiles(): Promise<Array<SellerProfile>>;
     getBrands(): Promise<Array<Brand>>;
@@ -89,8 +118,11 @@ export interface backendInterface {
     getCallerUserRole(): Promise<UserRole>;
     getDealOfDay(): Promise<Array<Product>>;
     getFeaturedProducts(): Promise<Array<Product>>;
+    getMyOrders(): Promise<Array<Order>>;
     getMySellerListings(): Promise<Array<SellerListing>>;
     getMySellerProfile(): Promise<SellerProfile | null>;
+    getOrderById(id: bigint): Promise<Order | null>;
+    getOrdersByStatus(status: OrderStatus): Promise<Array<Order>>;
     getPendingSellerListings(): Promise<Array<SellerListing>>;
     getProductById(id: bigint): Promise<Product | null>;
     getProducts(): Promise<Array<Product>>;
@@ -101,12 +133,14 @@ export interface backendInterface {
     getSocialLinks(): Promise<SocialLinks>;
     getUserProfile(user: Principal): Promise<UserProfile | null>;
     isCallerAdmin(): Promise<boolean>;
+    placeOrder(customerName: string, customerEmail: string, customerPhone: string, customerAddress: string, productId: bigint, productTitle: string, orderType: OrderType, sellerListingId: bigint | null, quantity: bigint, sellingPrice: number): Promise<bigint>;
     registerSellerProfile(storeName: string, description: string, contactEmail: string, contactWhatsApp: string, logoUrl: string): Promise<void>;
     saveCallerUserProfile(profile: UserProfile): Promise<void>;
     setAffiliateCode(code: string): Promise<boolean>;
     setDealOfDay(id: bigint, value: boolean): Promise<boolean>;
     setFeatured(id: bigint, value: boolean): Promise<boolean>;
     submitSellerListing(title: string, description: string, imageUrl: string, price: number, category: string, shippingInfo: string, contactEmail: string, contactWhatsApp: string): Promise<bigint>;
+    updateOrderStatus(id: bigint, status: OrderStatus): Promise<boolean>;
     updateProduct(id: bigint, title: string, description: string, imageUrl: string, price: number, category: string, affiliateLink: string, rating: number, brand: string, vendor: string): Promise<boolean>;
     updateSellerListingStatus(id: bigint, status: SellerListingStatus): Promise<boolean>;
     updateSocialLinks(links: SocialLinks): Promise<boolean>;

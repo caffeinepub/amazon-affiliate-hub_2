@@ -16,6 +16,7 @@ import {
 import { useEffect, useState } from "react";
 import ProductCard from "../components/ProductCard";
 import ProductCardSkeleton from "../components/ProductCardSkeleton";
+import SellerBuyerSection from "../components/SellerBuyerSection";
 import {
   useBrands,
   useDealOfDay,
@@ -95,7 +96,7 @@ export default function HomePage() {
         className="relative overflow-hidden min-h-[520px] flex items-center"
         style={{
           background:
-            "linear-gradient(135deg, oklch(0.18 0.01 260) 0%, oklch(0.24 0.04 260) 60%, oklch(0.22 0.06 48) 100%)",
+            "linear-gradient(135deg, oklch(0.22 0.16 240) 0%, oklch(0.32 0.20 220) 45%, oklch(0.28 0.18 200) 75%, oklch(0.24 0.12 260) 100%)",
         }}
       >
         {/* Bg image overlay */}
@@ -109,8 +110,18 @@ export default function HomePage() {
           }}
         />
         {/* Decorative blobs */}
-        <div className="absolute top-0 right-0 w-96 h-96 rounded-full bg-primary/20 blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none" />
-        <div className="absolute bottom-0 left-0 w-64 h-64 rounded-full bg-primary/10 blur-2xl translate-y-1/2 -translate-x-1/2 pointer-events-none" />
+        <div
+          className="absolute top-0 right-0 w-96 h-96 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none"
+          style={{ background: "oklch(0.55 0.22 220 / 0.35)" }}
+        />
+        <div
+          className="absolute bottom-0 left-0 w-64 h-64 rounded-full blur-2xl translate-y-1/2 -translate-x-1/2 pointer-events-none"
+          style={{ background: "oklch(0.65 0.18 200 / 0.20)" }}
+        />
+        <div
+          className="absolute top-1/2 left-1/2 w-80 h-80 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2 pointer-events-none"
+          style={{ background: "oklch(0.45 0.20 250 / 0.15)" }}
+        />
 
         <div className="container mx-auto px-4 relative z-10 py-16">
           <div className="max-w-2xl">
@@ -136,9 +147,9 @@ export default function HomePage() {
                 Browse Products
               </Button>
               <Button
-                variant="outline"
+                data-ocid="home.trending_button"
                 size="lg"
-                className="border-white/30 text-white hover:bg-white/10 gap-2"
+                className="trending-now-btn gap-2 font-semibold"
                 onClick={() =>
                   void navigate({
                     to: "/products",
@@ -170,6 +181,9 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+
+      {/* ── Seller / Buyer Portal ──────────────────────── */}
+      <SellerBuyerSection />
 
       <div className="container mx-auto px-4 py-12 space-y-16">
         {/* ── Deal of the Day ────────────────────────── */}

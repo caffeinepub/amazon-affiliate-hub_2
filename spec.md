@@ -1,29 +1,28 @@
-# Morgensegen Products — Affiliate Program Pages
+# Morgensegen Products — Seller/Buyer Tabs on Homepage + Seller Add Item Flow
 
 ## Current State
-- Multi-page affiliate + marketplace site with NavBar, Footer, Home, Products, Marketplace, Seller Portal, and Admin pages.
-- Footer has Quick Links and Contact sections.
-- NavBar has Products, Marketplace, and Admin nav links.
+- Full affiliate + marketplace site with products, brands, seller portal, admin panel
+- HomePage has hero, Deal of Day, Featured Products, Sell With Us CTA, Top Brands, banner strip
+- Seller listing submission exists at /seller (SellerPortalPage)
+- 50% margin is applied on MarketplaceDetailPage when displaying retail price to buyers (listing.price * 1.5)
+- No dedicated Seller/Buyer tab section on the homepage
 
 ## Requested Changes (Diff)
 
 ### Add
-- **AmazonAffiliateIndiaPage** (`/affiliate/amazon-india`): A dedicated page for Amazon India Affiliate Program linking out to https://affiliate-program.amazon.in/home. Should include program highlights, benefits, how-to-join steps, and a prominent CTA button that opens the link in a new tab.
-- **AmazonAffiliateGlobalPage** (`/affiliate/amazon-global`): A dedicated page for Amazon Associates (Global / US) linking out to https://affiliate-program.amazon.com/. Same structure — program highlights, benefits, how-to-join steps, and a prominent CTA button that opens the link in a new tab.
-- **Affiliate nav link** in NavBar (desktop + mobile) with a dropdown or dedicated link labelled "Affiliate" that links to both pages.
-- **Affiliate section in Footer** Quick Links column with links to both pages.
+- **Seller/Buyer tab section on HomePage**: A prominent two-tab UI ("For Sellers" | "For Buyers") placed below the hero, above the Deal of Day section
+  - "For Sellers" tab: Show an inline "Add Your Product" form (title, description, image URL, price in ₹ [their base price], category, shipping info, contact email, contact WhatsApp). On submit, call `submitSellerListing`. The 50% platform margin is silently applied — sellers enter their base price and buyers always see base price × 1.5. Do NOT mention the margin or markup to sellers anywhere in this UI. Show a success state after submission.
+  - "For Buyers" tab: Show the marketplace product grid (approved seller listings) with the retail price (base × 1.5) displayed. Link each card to /marketplace/:id. Show a "Browse All" button to /marketplace. Also show a short "How It Works for Buyers" (4 steps: Browse → Order → Pay → Delivered).
 
 ### Modify
-- `App.tsx`: Add two new routes (`/affiliate/amazon-india` and `/affiliate/amazon-global`).
-- `NavBar.tsx`: Add "Affiliate" nav entry with links to both affiliate pages (desktop nav and mobile menu).
-- `Footer.tsx`: Add links to both affiliate pages in the Quick Links section.
+- **HomePage.tsx**: Insert the Seller/Buyer tab section between the Hero section and the Deal of Day section
 
 ### Remove
-- Nothing removed.
+- Nothing removed
 
 ## Implementation Plan
-1. Create `src/pages/AffiliateAmazonIndiaPage.tsx` — page for Amazon.in affiliate program.
-2. Create `src/pages/AffiliateAmazonGlobalPage.tsx` — page for Amazon.com affiliate program.
-3. Update `App.tsx` to import and register both new routes.
-4. Update `NavBar.tsx` to add "Affiliate" links in desktop nav and mobile menu.
-5. Update `Footer.tsx` to add both affiliate pages in Quick Links.
+1. In HomePage.tsx, add a `SellerBuyerTabs` component (inline or separate file):
+   - Tab "For Sellers": form with fields title, description, imageUrl, price (labeled "Your Price"), category (Select), shippingInfo, contactEmail, contactWhatsApp. On submit call `useSubmitSellerListing`. Show success message. NO mention of margin/commission.
+   - Tab "For Buyers": use `useSellerListings` hook to load approved listings, display as a responsive card grid showing retail price (price * 1.5), link to /marketplace/:id. Show 4-step buyer workflow visually.
+2. Add the new section to HomePage between Hero and Deal of Day.
+3. Ensure the 50% margin calculation only lives on the display side — price stored in backend is always the seller's base price.
