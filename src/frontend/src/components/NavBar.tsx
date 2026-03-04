@@ -1,15 +1,9 @@
 import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Link, useNavigate } from "@tanstack/react-router";
 import {
-  ChevronDown,
   CreditCard,
+  ExternalLink,
   Globe,
   Menu,
   Search,
@@ -116,42 +110,21 @@ export default function NavBar({ onSearch, searchValue = "" }: NavBarProps) {
                   Payment
                 </Button>
               </Link>
-              {/* Affiliate dropdown */}
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    data-ocid="nav.affiliate_link"
-                    className="text-secondary-foreground hover:text-primary hover:bg-white/10 gap-1"
-                  >
-                    Affiliate
-                    <ChevronDown className="w-3 h-3" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="min-w-[180px]">
-                  <DropdownMenuItem asChild>
-                    <Link
-                      to="/affiliate/amazon-india"
-                      data-ocid="nav.affiliate.amazon_india_link"
-                      className="flex items-center gap-2 cursor-pointer"
-                    >
-                      <span className="text-base">🇮🇳</span>
-                      Amazon India
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link
-                      to="/affiliate/amazon-global"
-                      data-ocid="nav.affiliate.amazon_global_link"
-                      className="flex items-center gap-2 cursor-pointer"
-                    >
-                      <span className="text-base">🌍</span>
-                      Amazon Global
-                    </Link>
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+              <a
+                href="https://www.morgensegentechnologies.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                data-ocid="nav.our_website_link"
+              >
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-primary font-semibold hover:text-primary hover:bg-primary/10 gap-1 border border-primary/30"
+                >
+                  <ExternalLink className="w-3.5 h-3.5" />
+                  Our Website
+                </Button>
+              </a>
 
               {isAdmin && (
                 <Link to="/admin" data-ocid="nav.admin_link">
@@ -266,34 +239,22 @@ export default function NavBar({ onSearch, searchValue = "" }: NavBarProps) {
                   Payment
                 </Button>
               </Link>
-              <Link
-                to="/affiliate/amazon-india"
+              <a
+                href="https://www.morgensegentechnologies.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                data-ocid="nav.our_website_link"
                 onClick={() => setMobileMenuOpen(false)}
-                data-ocid="nav.affiliate.amazon_india_link"
               >
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="w-full justify-start text-secondary-foreground hover:text-primary gap-2"
+                  className="w-full justify-start text-primary font-semibold hover:text-primary gap-2 border border-primary/30"
                 >
-                  <span className="text-base leading-none">🇮🇳</span>
-                  Amazon India Affiliate
+                  <ExternalLink className="w-3.5 h-3.5" />
+                  Our Website
                 </Button>
-              </Link>
-              <Link
-                to="/affiliate/amazon-global"
-                onClick={() => setMobileMenuOpen(false)}
-                data-ocid="nav.affiliate.amazon_global_link"
-              >
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="w-full justify-start text-secondary-foreground hover:text-primary gap-2"
-                >
-                  <span className="text-base leading-none">🌍</span>
-                  Amazon Global Affiliate
-                </Button>
-              </Link>
+              </a>
               {isAdmin && (
                 <Link to="/admin" onClick={() => setMobileMenuOpen(false)}>
                   <Button

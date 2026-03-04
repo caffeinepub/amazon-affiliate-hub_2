@@ -55,6 +55,7 @@ import {
   useAddProduct,
   useAffiliateCode,
   useAllSellerListingsAdmin,
+  useAllSellerProfiles,
   useBrands,
   useDeleteBrand,
   useDeleteProduct,
@@ -1248,6 +1249,112 @@ function MarketplaceAdminTab() {
   );
 }
 
+// ── Seller Profiles Admin Tab ─────────────────────────────────────────────────
+
+function SellerProfilesAdminTab() {
+  const { data: profiles = [], isLoading } = useAllSellerProfiles();
+
+  return (
+    <div className="space-y-4">
+      <div className="bg-primary/5 border border-primary/20 rounded-xl p-4 text-sm text-muted-foreground">
+        <span className="font-semibold text-foreground">Note:</span> These are
+        registered seller accounts. Approve their product listings in the
+        Listings tab.
+      </div>
+
+      <div className="flex items-center justify-between">
+        <p className="text-sm text-muted-foreground">
+          {profiles.length} registered seller{profiles.length !== 1 ? "s" : ""}
+        </p>
+      </div>
+
+      <div className="rounded-lg border overflow-auto">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Store Name</TableHead>
+              <TableHead>Email</TableHead>
+              <TableHead>WhatsApp</TableHead>
+              <TableHead>Description</TableHead>
+              <TableHead>Registered</TableHead>
+              <TableHead>Seller ID</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {isLoading ? (
+              <TableRow>
+                <TableCell
+                  colSpan={6}
+                  className="text-center py-8 text-muted-foreground"
+                  data-ocid="admin.sellers.loading_state"
+                >
+                  <Loader2 className="w-5 h-5 animate-spin inline mr-2" />
+                  Loading sellers…
+                </TableCell>
+              </TableRow>
+            ) : profiles.length === 0 ? (
+              <TableRow>
+                <TableCell
+                  colSpan={6}
+                  className="text-center py-8 text-muted-foreground"
+                  data-ocid="admin.sellers.empty_state"
+                >
+                  No sellers registered yet.
+                </TableCell>
+              </TableRow>
+            ) : (
+              profiles.map((profile, idx) => (
+                <TableRow
+                  key={profile.sellerId.toString()}
+                  data-ocid={`admin.sellers.item.${idx + 1}`}
+                >
+                  <TableCell>
+                    <div className="flex items-center gap-2">
+                      {profile.logoUrl && (
+                        <img
+                          src={profile.logoUrl}
+                          alt={profile.storeName}
+                          className="w-8 h-8 rounded-full object-contain bg-muted border shrink-0"
+                          onError={(e) => {
+                            (e.target as HTMLImageElement).style.display =
+                              "none";
+                          }}
+                        />
+                      )}
+                      <span className="font-medium text-sm">
+                        {profile.storeName}
+                      </span>
+                    </div>
+                  </TableCell>
+                  <TableCell className="text-sm text-muted-foreground">
+                    {profile.contactEmail || "—"}
+                  </TableCell>
+                  <TableCell className="text-sm text-muted-foreground">
+                    {profile.contactWhatsApp || "—"}
+                  </TableCell>
+                  <TableCell className="text-sm text-muted-foreground max-w-[200px]">
+                    <span className="line-clamp-2">
+                      {profile.description || "—"}
+                    </span>
+                  </TableCell>
+                  <TableCell className="text-xs text-muted-foreground">
+                    {new Date(
+                      Number(profile.createdAt) / 1_000_000,
+                    ).toLocaleDateString()}
+                  </TableCell>
+                  <TableCell className="text-xs text-muted-foreground font-mono">
+                    {profile.sellerId.toString().slice(0, 12)}…
+                  </TableCell>
+                </TableRow>
+              ))
+            )}
+          </TableBody>
+        </Table>
+      </div>
+    </div>
+  );
+}
+
 // ── Main Admin Page ────────────────────────────────────────────────────────────
 
 export default function AdminPage() {
@@ -1341,8 +1448,11 @@ export default function AdminPage() {
           <TabsTrigger value="affiliate" data-ocid="admin.affiliate_code_tab">
             Affiliate Code
           </TabsTrigger>
+          <TabsTrigger value="sellers" data-ocid="admin.sellers_tab">
+            Sellers
+          </TabsTrigger>
           <TabsTrigger value="marketplace" data-ocid="admin.marketplace_tab">
-            Marketplace
+            Listings
           </TabsTrigger>
         </TabsList>
 
@@ -1357,6 +1467,9 @@ export default function AdminPage() {
         </TabsContent>
         <TabsContent value="affiliate">
           <AffiliateCodeTab />
+        </TabsContent>
+        <TabsContent value="sellers">
+          <SellerProfilesAdminTab />
         </TabsContent>
         <TabsContent value="marketplace">
           <MarketplaceAdminTab />

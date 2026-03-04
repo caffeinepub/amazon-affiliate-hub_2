@@ -13,8 +13,6 @@ import {
 import Footer from "./components/Footer";
 import NavBar from "./components/NavBar";
 import AdminPage from "./pages/AdminPage";
-import AffiliateAmazonGlobalPage from "./pages/AffiliateAmazonGlobalPage";
-import AffiliateAmazonIndiaPage from "./pages/AffiliateAmazonIndiaPage";
 import HomePage from "./pages/HomePage";
 import MarketplaceDetailPage from "./pages/MarketplaceDetailPage";
 import MarketplacePage from "./pages/MarketplacePage";
@@ -83,18 +81,6 @@ const sellerRoute = createRoute({
   component: SellerPortalPage,
 });
 
-const affiliateAmazonIndiaRoute = createRoute({
-  getParentRoute: () => rootRoute,
-  path: "/affiliate/amazon-india",
-  component: AffiliateAmazonIndiaPage,
-});
-
-const affiliateAmazonGlobalRoute = createRoute({
-  getParentRoute: () => rootRoute,
-  path: "/affiliate/amazon-global",
-  component: AffiliateAmazonGlobalPage,
-});
-
 const paymentRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/payment",
@@ -110,8 +96,6 @@ const routeTree = rootRoute.addChildren([
   marketplaceRoute,
   marketplaceDetailRoute,
   sellerRoute,
-  affiliateAmazonIndiaRoute,
-  affiliateAmazonGlobalRoute,
   paymentRoute,
 ]);
 

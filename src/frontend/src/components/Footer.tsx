@@ -68,26 +68,20 @@ export default function Footer() {
               </li>
               <li>
                 <a
-                  href="/affiliate/amazon-india"
-                  className="hover:text-primary transition-colors"
-                >
-                  Amazon India Affiliate
-                </a>
-              </li>
-              <li>
-                <a
-                  href="/affiliate/amazon-global"
-                  className="hover:text-primary transition-colors"
-                >
-                  Amazon Global Affiliate
-                </a>
-              </li>
-              <li>
-                <a
                   href="/payment"
                   className="hover:text-primary transition-colors"
                 >
                   Payment
+                </a>
+              </li>
+              <li>
+                <a
+                  href="https://www.morgensegentechnologies.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:text-primary transition-colors"
+                >
+                  Our Website
                 </a>
               </li>
             </ul>

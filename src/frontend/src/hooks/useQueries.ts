@@ -436,6 +436,22 @@ export function useMySellerProfile() {
   });
 }
 
+export function useAllSellerProfiles() {
+  const { actor, isFetching } = useActor();
+  return useQuery<import("../backend").SellerProfile[]>({
+    queryKey: ["allSellerProfiles"],
+    queryFn: async () => {
+      if (!actor) return [];
+      try {
+        return await actor.getAllSellerProfiles();
+      } catch {
+        return [];
+      }
+    },
+    enabled: !!actor && !isFetching,
+  });
+}
+
 export function useAffiliateCode() {
   const { actor, isFetching } = useActor();
   return useQuery<string>({

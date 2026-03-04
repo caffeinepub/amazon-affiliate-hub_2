@@ -21,12 +21,14 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import {
   CheckCircle,
+  Clock,
   Loader2,
   Package,
   Plus,
   Save,
   Shield,
   Store,
+  ThumbsUp,
   Trash2,
   XCircle,
 } from "lucide-react";
@@ -192,6 +194,9 @@ function SubmitListingForm() {
     shippingInfo: "",
     contactEmail: "",
     contactWhatsApp: "",
+    quantity: "1",
+    dimensionsWeight: "",
+    deliveryTimeline: "",
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -201,8 +206,31 @@ function SubmitListingForm() {
       toast.error("Please enter a valid price");
       return;
     }
+
+    // Pack extra fields into shippingInfo
+    const extraParts: string[] = [];
+    if (form.quantity && form.quantity !== "1")
+      extraParts.push(`Qty available: ${form.quantity}`);
+    if (form.dimensionsWeight)
+      extraParts.push(`Dimensions/Weight: ${form.dimensionsWeight}`);
+    if (form.deliveryTimeline)
+      extraParts.push(`Delivery: ${form.deliveryTimeline}`);
+    const combinedShipping =
+      extraParts.length > 0
+        ? `${form.shippingInfo ? `${form.shippingInfo} | ` : ""}${extraParts.join(" | ")}`
+        : form.shippingInfo;
+
     try {
-      await submitMutation.mutateAsync({ ...form, price });
+      await submitMutation.mutateAsync({
+        title: form.title,
+        description: form.description,
+        imageUrl: form.imageUrl,
+        price,
+        category: form.category,
+        shippingInfo: combinedShipping,
+        contactEmail: form.contactEmail,
+        contactWhatsApp: form.contactWhatsApp,
+      });
       toast.success("Listing submitted for review!");
       setForm({
         title: "",
@@ -213,6 +241,9 @@ function SubmitListingForm() {
         shippingInfo: "",
         contactEmail: "",
         contactWhatsApp: "",
+        quantity: "1",
+        dimensionsWeight: "",
+        deliveryTimeline: "",
       });
     } catch {
       toast.error("Failed to submit listing");
@@ -322,6 +353,43 @@ function SubmitListingForm() {
           onChange={(e) => set("shippingInfo", e.target.value)}
           rows={2}
           placeholder="Estimated delivery time, shipping methods, countries covered…"
+        />
+      </div>
+
+      {/* Extra product detail fields */}
+      <div className="grid grid-cols-2 gap-3">
+        <div>
+          <Label htmlFor="lf-qty">Quantity Available</Label>
+          <Input
+            id="lf-qty"
+            data-ocid="seller.listing_quantity_input"
+            type="number"
+            min="1"
+            value={form.quantity}
+            onChange={(e) => set("quantity", e.target.value)}
+            placeholder="1"
+          />
+        </div>
+        <div>
+          <Label htmlFor="lf-dims">Dimensions / Weight</Label>
+          <Input
+            id="lf-dims"
+            data-ocid="seller.listing_dimensions_input"
+            value={form.dimensionsWeight}
+            onChange={(e) => set("dimensionsWeight", e.target.value)}
+            placeholder="e.g. 30x20x10 cm, 0.5 kg"
+          />
+        </div>
+      </div>
+
+      <div>
+        <Label htmlFor="lf-delivery">Estimated Delivery</Label>
+        <Input
+          id="lf-delivery"
+          data-ocid="seller.listing_delivery_input"
+          value={form.deliveryTimeline}
+          onChange={(e) => set("deliveryTimeline", e.target.value)}
+          placeholder="e.g. 7-14 business days"
         />
       </div>
 
@@ -500,6 +568,84 @@ function MyListings() {
   );
 }
 
+// ── Seller Stats Dashboard ─────────────────────────────────────────────────────
+
+function SellerStatsDashboard() {
+  const { data: listings = [], isLoading } = useMySellerListings();
+
+  const total = listings.length;
+  const pending = listings.filter(
+    (l) => (l.status as string) === "pending",
+  ).length;
+  const approved = listings.filter(
+    (l) => (l.status as string) === "approved",
+  ).length;
+  const rejected = listings.filter(
+    (l) => (l.status as string) === "rejected",
+  ).length;
+
+  if (isLoading) return null;
+
+  const stats = [
+    {
+      label: "Total Listings",
+      value: total,
+      icon: Package,
+      color: "text-primary",
+      bg: "bg-primary/10",
+    },
+    {
+      label: "Pending Review",
+      value: pending,
+      icon: Clock,
+      color: "text-amber-400",
+      bg: "bg-amber-500/10",
+    },
+    {
+      label: "Approved",
+      value: approved,
+      icon: ThumbsUp,
+      color: "text-emerald-400",
+      bg: "bg-emerald-500/10",
+    },
+    {
+      label: "Rejected",
+      value: rejected,
+      icon: XCircle,
+      color: "text-red-400",
+      bg: "bg-red-500/10",
+    },
+  ];
+
+  return (
+    <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-8">
+      {stats.map((stat) => {
+        const Icon = stat.icon;
+        return (
+          <div
+            key={stat.label}
+            className="bg-card rounded-xl border border-border/50 p-4 flex items-center gap-3"
+          >
+            <div
+              className={`w-10 h-10 rounded-lg ${stat.bg} flex items-center justify-center shrink-0`}
+            >
+              <Icon className={`w-5 h-5 ${stat.color}`} />
+            </div>
+            <div>
+              <p className="text-2xl font-bold font-display leading-none">
+                {stat.value}
+              </p>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                {stat.label}
+              </p>
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
 // ── Main Seller Portal ─────────────────────────────────────────────────────────
 
 export default function SellerPortalPage() {
@@ -566,6 +712,9 @@ export default function SellerPortalPage() {
           Manage your store and listings on the AffiliateHub marketplace.
         </p>
       </div>
+
+      {/* Stats Dashboard — shown when seller has a profile */}
+      {sellerProfile && <SellerStatsDashboard />}
 
       {/* My Store Section */}
       <div className="mb-8">
