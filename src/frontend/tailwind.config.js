@@ -16,9 +16,10 @@ export default {
     },
     extend: {
       fontFamily: {
-        display: ['"Bricolage Grotesque"', '"Cabinet Grotesk"', "system-ui", "sans-serif"],
+        display: ['"Mona Sans"', '"Cabinet Grotesk"', "system-ui", "sans-serif"],
         sans: ['"General Sans"', '"Cabinet Grotesk"', "system-ui", "sans-serif"],
-        heading: ['"Cabinet Grotesk"', "system-ui", "sans-serif"],
+        heading: ['"Mona Sans"', '"Cabinet Grotesk"', "system-ui", "sans-serif"],
+        mono: ['"Geist Mono"', "monospace"],
       },
       colors: {
         border: "oklch(var(--border))",
@@ -71,7 +72,6 @@ export default {
           border: "oklch(var(--sidebar-border))",
           ring: "oklch(var(--sidebar-ring))",
         },
-        // Vendor brand colors
         amazon: "oklch(var(--amazon))",
         aliexpress: "oklch(var(--aliexpress))",
         alibaba: "oklch(var(--alibaba))",
@@ -82,12 +82,15 @@ export default {
         sm: "calc(var(--radius) - 4px)",
         xl: "calc(var(--radius) + 4px)",
         "2xl": "calc(var(--radius) + 8px)",
+        "3xl": "calc(var(--radius) + 16px)",
       },
       boxShadow: {
         xs: "0 1px 2px 0 rgba(0,0,0,0.05)",
         card: "0 2px 12px rgba(0,0,0,0.08), 0 1px 3px rgba(0,0,0,0.05)",
         "card-hover": "0 8px 30px rgba(0,0,0,0.14), 0 2px 8px rgba(0,0,0,0.08)",
-        orange: "0 4px 24px rgba(232,140,40,0.28)",
+        blue: "0 4px 24px oklch(0.38 0.18 250 / 0.30)",
+        orange: "0 4px 24px oklch(0.72 0.20 60 / 0.32)",
+        glow: "0 0 40px oklch(0.38 0.18 250 / 0.20)",
       },
       keyframes: {
         "accordion-down": {
@@ -110,9 +113,9 @@ export default {
           from: { opacity: "0", transform: "translateX(20px)" },
           to: { opacity: "1", transform: "translateX(0)" },
         },
-        marquee: {
-          "0%": { transform: "translateX(0)" },
-          "100%": { transform: "translateX(-50%)" },
+        "pulse-glow": {
+          "0%, 100%": { opacity: "1" },
+          "50%": { opacity: "0.7" },
         },
       },
       animation: {
@@ -121,7 +124,7 @@ export default {
         shimmer: "shimmer 2s linear infinite",
         "fade-in": "fade-in 0.4s ease-out",
         "fade-in-delay": "fade-in 0.4s ease-out 0.1s both",
-        marquee: "marquee 20s linear infinite",
+        "pulse-glow": "pulse-glow 2s ease-in-out infinite",
       },
     },
   },

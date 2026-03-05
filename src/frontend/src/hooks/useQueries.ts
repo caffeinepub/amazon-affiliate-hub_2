@@ -580,3 +580,94 @@ export function useSetAffiliateCode() {
     },
   });
 }
+
+// ── Orders ────────────────────────────────────────────────────────────────────
+
+export function useMyOrders() {
+  const { actor, isFetching } = useActor();
+  return useQuery<import("../backend").Order[]>({
+    queryKey: ["myOrders"],
+    queryFn: async () => {
+      if (!actor) return [];
+      try {
+        return await actor.getMyOrders();
+      } catch {
+        return [];
+      }
+    },
+    enabled: !!actor && !isFetching,
+  });
+}
+
+export function useAllOrdersAdmin() {
+  const { actor, isFetching } = useActor();
+  return useQuery<import("../backend").Order[]>({
+    queryKey: ["allOrders"],
+    queryFn: async () => {
+      if (!actor) return [];
+      try {
+        return await actor.getAllOrdersAdmin();
+      } catch {
+        return [];
+      }
+    },
+    enabled: !!actor && !isFetching,
+  });
+}
+
+export function useUpdateOrderStatus() {
+  const { actor } = useActor();
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({
+      id,
+      status,
+    }: {
+      id: bigint;
+      status: import("../backend").OrderStatus;
+    }) => {
+      if (!actor) throw new Error("Not connected");
+      return actor.updateOrderStatus(id, status);
+    },
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: ["allOrders"] });
+      void qc.invalidateQueries({ queryKey: ["myOrders"] });
+    },
+  });
+}
+
+export function usePlaceOrder() {
+  const { actor } = useActor();
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (data: {
+      customerName: string;
+      customerEmail: string;
+      customerPhone: string;
+      customerAddress: string;
+      productId: bigint;
+      productTitle: string;
+      orderType: import("../backend").OrderType;
+      sellerListingId: bigint | null;
+      quantity: bigint;
+      sellingPrice: number;
+    }) => {
+      if (!actor) throw new Error("Not connected");
+      return actor.placeOrder(
+        data.customerName,
+        data.customerEmail,
+        data.customerPhone,
+        data.customerAddress,
+        data.productId,
+        data.productTitle,
+        data.orderType,
+        data.sellerListingId,
+        data.quantity,
+        data.sellingPrice,
+      );
+    },
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: ["myOrders"] });
+    },
+  });
+}

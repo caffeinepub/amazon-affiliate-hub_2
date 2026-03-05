@@ -1,4 +1,10 @@
-export type VendorKey = "amazon" | "aliexpress" | "alibaba";
+export type VendorKey =
+  | "amazon"
+  | "aliexpress"
+  | "alibaba"
+  | "dhgate"
+  | "cjdropshipping"
+  | "tiktok";
 
 export const VENDOR_CONFIG: Record<
   string,
@@ -22,6 +28,24 @@ export const VENDOR_CONFIG: Record<
     bgClass: "bg-[#ff6a00]",
     textClass: "text-[#ff6a00]",
   },
+  dhgate: {
+    label: "DHgate",
+    color: "#c0392b",
+    bgClass: "bg-[#c0392b]",
+    textClass: "text-[#c0392b]",
+  },
+  cjdropshipping: {
+    label: "CJ Dropship",
+    color: "#2980b9",
+    bgClass: "bg-[#2980b9]",
+    textClass: "text-[#2980b9]",
+  },
+  tiktok: {
+    label: "TikTok",
+    color: "#010101",
+    bgClass: "bg-[#010101]",
+    textClass: "text-[#010101]",
+  },
 };
 
 export function getVendorConfig(vendor: string) {
@@ -35,9 +59,8 @@ export function getVendorConfig(vendor: string) {
   );
 }
 
+// Kept for backward compatibility — use priceUtils.ts formatPrice for INR
 export function formatPrice(price: number): string {
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "USD",
-  }).format(price);
+  const inr = price * 83;
+  return `₹${inr.toLocaleString("en-IN", { maximumFractionDigits: 0 })}`;
 }

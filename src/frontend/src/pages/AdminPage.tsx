@@ -30,7 +30,9 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import {
+  Brain,
   Check,
+  Download,
   Loader2,
   Pencil,
   Plus,
@@ -70,7 +72,11 @@ import {
   useUpdateSellerListingStatus,
   useUpdateSocialLinks,
 } from "../hooks/useQueries";
+import { computeTrendScore, getProductTrendSignals } from "../utils/trendUtils";
 import { formatPrice, getVendorConfig } from "../utils/vendorUtils";
+
+const SUPPLIER_VENDORS = ["aliexpress", "cjdropshipping", "dhgate"] as const;
+type SupplierVendor = (typeof SUPPLIER_VENDORS)[number];
 
 const VENDORS = ["amazon", "aliexpress", "alibaba"] as const;
 
@@ -306,9 +312,7 @@ function ProductFormModal({
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  {CATEGORIES.filter(
-                    (c) => c !== "All" && c !== "Chinese Products",
-                  ).map((c) => (
+                  {CATEGORIES.filter((c) => c !== "All").map((c) => (
                     <SelectItem key={c} value={c}>
                       {c}
                     </SelectItem>
@@ -696,9 +700,7 @@ function BrandsTab() {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  {CATEGORIES.filter(
-                    (c) => c !== "All" && c !== "Chinese Products",
-                  ).map((c) => (
+                  {CATEGORIES.filter((c) => c !== "All").map((c) => (
                     <SelectItem key={c} value={c}>
                       {c}
                     </SelectItem>
@@ -1355,6 +1357,430 @@ function SellerProfilesAdminTab() {
   );
 }
 
+// ── Trend Radar Tab ────────────────────────────────────────────────────────────
+
+function TrendRadarTab() {
+  const { data: products = [] } = useProducts();
+
+  // Compute trend info for each product
+  const trendData = products.map((p) => {
+    const signals = getProductTrendSignals(p.id);
+    const score = computeTrendScore(signals);
+    return { product: p, score };
+  });
+
+  const winningProducts = trendData.filter((d) => d.score > 60);
+  const supplierProducts = products.filter((p) =>
+    ["aliexpress", "cjdropshipping", "dhgate"].includes(p.vendor.toLowerCase()),
+  );
+
+  // Category with most high-trend products
+  const categoryCounts = winningProducts.reduce<Record<string, number>>(
+    (acc, { product }) => {
+      acc[product.category] = (acc[product.category] ?? 0) + 1;
+      return acc;
+    },
+    {},
+  );
+  const topCategory =
+    Object.entries(categoryCounts).sort((a, b) => b[1] - a[1])[0]?.[0] ?? "N/A";
+
+  // Revenue potential (price × 0.15 for winning products)
+  const revenuePotential = winningProducts.reduce(
+    (sum, { product }) => sum + product.price * 0.15,
+    0,
+  );
+
+  // Category breakdown (all products)
+  const allCategoryCounts = products.reduce<Record<string, number>>(
+    (acc, p) => {
+      acc[p.category] = (acc[p.category] ?? 0) + 1;
+      return acc;
+    },
+    {},
+  );
+  const topCategories = Object.entries(allCategoryCounts)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 6);
+  const maxCatCount = topCategories[0]?.[1] ?? 1;
+
+  // Top 10 trending
+  const top10 = [...trendData].sort((a, b) => b.score - a.score).slice(0, 10);
+
+  const summaryCards = [
+    {
+      label: "Winning Products Today",
+      value: winningProducts.length,
+      icon: "🏆",
+      color: "text-amber-400",
+      bg: "bg-amber-500/10 border-amber-500/20",
+    },
+    {
+      label: "Supplier Imports",
+      value: supplierProducts.length,
+      icon: "📦",
+      color: "text-blue-400",
+      bg: "bg-blue-500/10 border-blue-500/20",
+    },
+    {
+      label: "Top Trending Category",
+      value: topCategory,
+      icon: "📊",
+      color: "text-purple-400",
+      bg: "bg-purple-500/10 border-purple-500/20",
+      isString: true,
+    },
+    {
+      label: "Revenue Potential",
+      value: `₹${revenuePotential.toFixed(0)}`,
+      icon: "💰",
+      color: "text-emerald-400",
+      bg: "bg-emerald-500/10 border-emerald-500/20",
+      isString: true,
+    },
+  ];
+
+  return (
+    <div className="space-y-8">
+      {/* Summary cards */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        {summaryCards.map((card) => (
+          <div key={card.label} className={`rounded-xl p-4 border ${card.bg}`}>
+            <div className="text-2xl mb-2">{card.icon}</div>
+            <div
+              className={`font-display font-extrabold text-2xl ${card.color}`}
+            >
+              {card.isString ? card.value : card.value}
+            </div>
+            <div className="text-xs text-muted-foreground mt-1">
+              {card.label}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Category breakdown */}
+      <div className="bg-card rounded-xl border border-border/50 p-5">
+        <h3 className="font-heading font-semibold text-sm mb-4">
+          Category Breakdown
+        </h3>
+        <div className="space-y-3">
+          {topCategories.map(([cat, count]) => (
+            <div key={cat} className="flex items-center gap-3">
+              <span className="text-xs w-32 shrink-0 text-muted-foreground truncate">
+                {cat}
+              </span>
+              <div className="flex-1 h-2 bg-muted rounded-full overflow-hidden">
+                <div
+                  className="h-full rounded-full bg-gradient-to-r from-primary to-accent"
+                  style={{
+                    width: `${(count / maxCatCount) * 100}%`,
+                    transition: "width 0.6s ease",
+                  }}
+                />
+              </div>
+              <span className="text-xs font-bold text-foreground w-6 text-right">
+                {count}
+              </span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Top 10 trending products */}
+      <div>
+        <h3 className="font-heading font-semibold text-sm mb-3">
+          Top 10 Trending Products
+        </h3>
+        <div className="rounded-lg border overflow-auto">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>#</TableHead>
+                <TableHead>Product</TableHead>
+                <TableHead>Category</TableHead>
+                <TableHead>Trend Score</TableHead>
+                <TableHead>Price</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {top10.map(({ product, score }, idx) => (
+                <TableRow key={product.id.toString()}>
+                  <TableCell className="font-mono text-xs text-muted-foreground">
+                    {idx + 1}
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex items-center gap-2">
+                      <img
+                        src={product.imageUrl}
+                        alt={product.title}
+                        className="w-8 h-8 rounded object-cover bg-muted border shrink-0"
+                        onError={(e) => {
+                          (e.target as HTMLImageElement).src =
+                            `https://picsum.photos/seed/${product.id}/60/60`;
+                        }}
+                      />
+                      <p className="text-sm font-medium line-clamp-1 max-w-[180px]">
+                        {product.title}
+                      </p>
+                    </div>
+                  </TableCell>
+                  <TableCell className="text-sm">{product.category}</TableCell>
+                  <TableCell>
+                    <div className="flex items-center gap-2">
+                      <div className="w-20 h-1.5 bg-muted rounded-full overflow-hidden">
+                        <div
+                          className="h-full rounded-full bg-gradient-to-r from-primary to-accent"
+                          style={{ width: `${Math.min(score, 100)}%` }}
+                        />
+                      </div>
+                      <span className="text-xs font-mono font-bold text-primary">
+                        {Math.round(score)}
+                      </span>
+                    </div>
+                  </TableCell>
+                  <TableCell className="text-sm font-semibold text-primary">
+                    {formatPrice(product.price)}
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── Supplier Import Tab ────────────────────────────────────────────────────────
+
+interface SupplierImportForm {
+  title: string;
+  description: string;
+  imageUrl: string;
+  supplierPrice: string;
+  category: string;
+  platform: SupplierVendor;
+  badge: string;
+}
+
+const EMPTY_SUPPLIER_FORM: SupplierImportForm = {
+  title: "",
+  description: "",
+  imageUrl: "",
+  supplierPrice: "",
+  category: "Electronics",
+  platform: "aliexpress",
+  badge: "none",
+};
+
+const PLATFORM_LABELS: Record<SupplierVendor, string> = {
+  aliexpress: "AliExpress",
+  cjdropshipping: "CJ Dropshipping",
+  dhgate: "DHgate",
+};
+
+function SupplierImportTab() {
+  const addMutation = useAddProduct();
+  const [form, setForm] = useState<SupplierImportForm>(EMPTY_SUPPLIER_FORM);
+
+  const supplierPrice = Number.parseFloat(form.supplierPrice) || 0;
+  const displayPrice = supplierPrice * 1.5;
+
+  const set = (key: keyof SupplierImportForm, val: string) =>
+    setForm((f) => ({ ...f, [key]: val }));
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (supplierPrice <= 0) {
+      toast.error("Enter a valid supplier price");
+      return;
+    }
+    try {
+      await addMutation.mutateAsync({
+        title: form.title,
+        description: form.description,
+        imageUrl: form.imageUrl,
+        price: displayPrice,
+        category: form.category,
+        affiliateLink: "",
+        rating: 4.0,
+        brand: PLATFORM_LABELS[form.platform],
+        vendor: form.platform,
+      });
+      const platformLabel = PLATFORM_LABELS[form.platform];
+      toast.success(
+        `Product imported from ${platformLabel} at display price ₹${displayPrice.toFixed(2)}`,
+      );
+      setForm(EMPTY_SUPPLIER_FORM);
+    } catch (err) {
+      toast.error(
+        err instanceof Error ? err.message : "Failed to import product",
+      );
+    }
+  };
+
+  return (
+    <div className="space-y-6 max-w-xl">
+      <div className="bg-primary/5 border border-primary/20 rounded-xl p-4 text-sm text-muted-foreground">
+        <p>
+          <span className="font-semibold text-foreground">
+            Hidden margin enforced:{" "}
+          </span>
+          Supplier price is never shown to buyers. Display price is always
+          supplier price × 1.5.
+        </p>
+      </div>
+
+      <form onSubmit={(e) => void handleSubmit(e)} className="space-y-4">
+        {/* Title */}
+        <div>
+          <Label htmlFor="si-title">Product Title *</Label>
+          <Input
+            id="si-title"
+            value={form.title}
+            onChange={(e) => set("title", e.target.value)}
+            required
+            placeholder="e.g. Wireless Earbuds Pro"
+          />
+        </div>
+
+        {/* Description */}
+        <div>
+          <Label htmlFor="si-desc">Description</Label>
+          <Textarea
+            id="si-desc"
+            value={form.description}
+            onChange={(e) => set("description", e.target.value)}
+            rows={3}
+            placeholder="Product description…"
+          />
+        </div>
+
+        {/* Image URL */}
+        <div>
+          <Label htmlFor="si-image">Image URL</Label>
+          <Input
+            id="si-image"
+            value={form.imageUrl}
+            onChange={(e) => set("imageUrl", e.target.value)}
+            placeholder="https://…"
+          />
+        </div>
+
+        {/* Supplier Price */}
+        <div>
+          <Label htmlFor="si-price">
+            Supplier Price (₹) * —{" "}
+            <span className="text-muted-foreground text-xs font-normal">
+              hidden from buyers
+            </span>
+          </Label>
+          <Input
+            id="si-price"
+            data-ocid="admin.supplier_import.supplier_price_input"
+            type="number"
+            step="0.01"
+            min="0.01"
+            value={form.supplierPrice}
+            onChange={(e) => set("supplierPrice", e.target.value)}
+            required
+            placeholder="400"
+          />
+        </div>
+
+        <div className="grid grid-cols-2 gap-3">
+          {/* Category */}
+          <div>
+            <Label>Category *</Label>
+            <Select
+              value={form.category}
+              onValueChange={(v) => set("category", v)}
+            >
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {CATEGORIES.filter((c) => c !== "All").map((c) => (
+                  <SelectItem key={c} value={c}>
+                    {c}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Source Platform */}
+          <div>
+            <Label>Source Platform *</Label>
+            <Select
+              value={form.platform}
+              onValueChange={(v) => set("platform", v as SupplierVendor)}
+            >
+              <SelectTrigger data-ocid="admin.supplier_import.platform_select">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {SUPPLIER_VENDORS.map((v) => (
+                  <SelectItem key={v} value={v}>
+                    {PLATFORM_LABELS[v]}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+
+        {/* Badge */}
+        <div>
+          <Label>Deal Badge</Label>
+          <Select value={form.badge} onValueChange={(v) => set("badge", v)}>
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="none">No Badge</SelectItem>
+              <SelectItem value="hot-deal">🔥 Hot Deal</SelectItem>
+              <SelectItem value="trending-now">📈 Trending Now</SelectItem>
+              <SelectItem value="best-seller">⭐ Best Seller</SelectItem>
+              <SelectItem value="flash-deal">⚡ Flash Deal</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        {/* Auto-preview */}
+        {supplierPrice > 0 && (
+          <div className="rounded-xl bg-emerald-500/10 border border-emerald-500/20 p-4 text-center">
+            <p className="text-xs text-muted-foreground mb-1">
+              Buyer Display Price (auto-calculated)
+            </p>
+            <p className="font-display font-extrabold text-3xl text-emerald-400">
+              ₹{displayPrice.toFixed(2)}
+            </p>
+            <p className="text-xs text-muted-foreground mt-1">
+              Supplier: ₹{supplierPrice.toFixed(2)} × 1.5 markup
+            </p>
+          </div>
+        )}
+
+        <Button
+          type="submit"
+          data-ocid="admin.supplier_import.submit_button"
+          disabled={addMutation.isPending}
+          className="w-full gap-2"
+        >
+          {addMutation.isPending ? (
+            <Loader2 className="w-4 h-4 animate-spin" />
+          ) : (
+            <Download className="w-4 h-4" />
+          )}
+          Import Product
+        </Button>
+      </form>
+    </div>
+  );
+}
+
 // ── Main Admin Page ────────────────────────────────────────────────────────────
 
 export default function AdminPage() {
@@ -1454,6 +1880,22 @@ export default function AdminPage() {
           <TabsTrigger value="marketplace" data-ocid="admin.marketplace_tab">
             Listings
           </TabsTrigger>
+          <TabsTrigger
+            value="trend-radar"
+            data-ocid="admin.trend_radar_tab"
+            className="gap-1"
+          >
+            <Brain className="w-3.5 h-3.5" />
+            Trend Radar
+          </TabsTrigger>
+          <TabsTrigger
+            value="supplier-import"
+            data-ocid="admin.supplier_import_tab"
+            className="gap-1"
+          >
+            <Download className="w-3.5 h-3.5" />
+            Supplier Import
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="products">
@@ -1473,6 +1915,12 @@ export default function AdminPage() {
         </TabsContent>
         <TabsContent value="marketplace">
           <MarketplaceAdminTab />
+        </TabsContent>
+        <TabsContent value="trend-radar">
+          <TrendRadarTab />
+        </TabsContent>
+        <TabsContent value="supplier-import">
+          <SupplierImportTab />
         </TabsContent>
       </Tabs>
     </main>

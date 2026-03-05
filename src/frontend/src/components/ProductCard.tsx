@@ -3,6 +3,11 @@ import { Button } from "@/components/ui/button";
 import { Link } from "@tanstack/react-router";
 import { ExternalLink, Star } from "lucide-react";
 import type { Product } from "../backend";
+import {
+  computeTrendScore,
+  getProductBadge,
+  getProductTrendSignals,
+} from "../utils/trendUtils";
 import { formatPrice, getVendorConfig } from "../utils/vendorUtils";
 
 interface ProductCardProps {
@@ -30,8 +35,46 @@ function StarRating({ rating }: { rating: number }) {
   );
 }
 
+function TrendBadgeOverlay({
+  trendScore,
+  dealOfDay,
+  featured,
+}: {
+  trendScore: number;
+  dealOfDay: boolean;
+  featured: boolean;
+}) {
+  const badge = getProductBadge(trendScore, dealOfDay, featured);
+  if (!badge) return null;
+
+  const styles: Record<string, string> = {
+    "Trending Now": "bg-purple-600 text-white",
+    "Hot Deal": "bg-amber-500 text-white",
+    "Flash Deal": "bg-red-600 text-white animate-pulse",
+    "Best Seller": "bg-blue-600 text-white",
+  };
+
+  const icons: Record<string, string> = {
+    "Trending Now": "🔥",
+    "Hot Deal": "⚡",
+    "Flash Deal": "⚡",
+    "Best Seller": "⭐",
+  };
+
+  return (
+    <div
+      className={`absolute top-2 right-2 px-1.5 py-0.5 rounded-full text-[9px] font-bold shadow-sm flex items-center gap-0.5 ${styles[badge] ?? "bg-gray-600 text-white"}`}
+    >
+      <span>{icons[badge]}</span>
+      <span>{badge}</span>
+    </div>
+  );
+}
+
 export default function ProductCard({ product, index = 1 }: ProductCardProps) {
   const vendor = getVendorConfig(product.vendor);
+  const signals = getProductTrendSignals(product.id);
+  const trendScore = computeTrendScore(signals);
 
   return (
     <div
@@ -57,11 +100,12 @@ export default function ProductCard({ product, index = 1 }: ProductCardProps) {
         >
           {vendor.label}
         </div>
-        {product.dealOfDay && (
-          <div className="absolute top-2 right-2 bg-destructive text-destructive-foreground px-2 py-0.5 rounded-full text-[10px] font-bold animate-pulse">
-            🔥 Deal
-          </div>
-        )}
+        {/* Trend badge overlay (top-right) */}
+        <TrendBadgeOverlay
+          trendScore={trendScore}
+          dealOfDay={product.dealOfDay}
+          featured={product.featured}
+        />
       </div>
 
       {/* Content */}
