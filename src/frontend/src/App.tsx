@@ -36,6 +36,7 @@ import ProductsPage from "./pages/ProductsPage";
 import SellerDashboardPage from "./pages/SellerDashboardPage";
 import SellerRegistrationPage from "./pages/SellerRegistrationPage";
 import TrendingProductsPage from "./pages/TrendingProductsPage";
+import UpiPaymentPage from "./pages/UpiPaymentPage";
 
 // Re-export router primitives for use in child components
 export { Link, useNavigate, useParams, useSearch };
@@ -164,6 +165,12 @@ const paymentRoute = createRoute({
   component: PaymentPage,
 });
 
+const upiPaymentRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/upi-payment",
+  component: UpiPaymentPage,
+});
+
 const contactRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/contact",
@@ -216,6 +223,7 @@ const routeTree = rootRoute.addChildren([
   marketplaceRoute,
   marketplaceDetailRoute,
   paymentRoute,
+  upiPaymentRoute,
   contactRoute,
   blogRoute,
   blogPostRoute,

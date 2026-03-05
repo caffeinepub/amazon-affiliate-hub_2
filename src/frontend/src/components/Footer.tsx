@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { Heart, Mail, MessageCircle, Send } from "lucide-react";
+import { Heart, Mail, MessageCircle, QrCode, Send } from "lucide-react";
 import {
   SiFacebook,
   SiInstagram,
@@ -109,6 +109,7 @@ export default function Footer() {
                 { label: "Amazon Deals", path: "/amazon-deals" },
                 { label: "Global Deals", path: "/global-deals" },
                 { label: "Buyer Dashboard", path: "/buyer-dashboard" },
+                { label: "UPI Payment", path: "/upi-payment" },
                 { label: "Blog", path: "/blog" },
                 { label: "Contact", path: "/contact" },
               ].map((l) => (
@@ -207,6 +208,46 @@ export default function Footer() {
                 </a>
               </li>
             </ul>
+          </div>
+        </div>
+
+        {/* UPI QR section */}
+        <div className="border-t border-white/10 pt-8 mb-8">
+          <div className="flex flex-col sm:flex-row items-center gap-6">
+            <div className="flex-shrink-0 rounded-xl border-2 border-white/20 bg-white p-2 shadow-md">
+              <img
+                src="/assets/generated/upi-payment.dim_400x400.png"
+                alt="UPI QR Code"
+                width={80}
+                height={80}
+                className="block rounded"
+              />
+            </div>
+            <div>
+              <div className="flex items-center gap-2 mb-1">
+                <QrCode className="w-4 h-4 text-accent" />
+                <span className="text-sm font-semibold text-white/80">
+                  Pay via UPI
+                </span>
+              </div>
+              <p className="text-xs text-white/50 mb-2">
+                Scan the QR code using Google Pay, PhonePe, Paytm, or BHIM
+              </p>
+              <div className="inline-flex items-center gap-2 rounded-lg border border-white/20 bg-white/10 px-3 py-1.5">
+                <span className="font-mono text-xs text-white/70">
+                  UPI ID: chaudhary.nishant-4@oksbi
+                </span>
+              </div>
+              <div className="mt-3">
+                <Link
+                  to="/upi-payment"
+                  className="inline-flex items-center gap-1.5 rounded-lg bg-accent/20 border border-accent/30 px-3 py-1.5 text-xs font-medium text-accent hover:bg-accent/30 transition-colors"
+                >
+                  <QrCode className="w-3.5 h-3.5" />
+                  View Full Payment Page
+                </Link>
+              </div>
+            </div>
           </div>
         </div>
 

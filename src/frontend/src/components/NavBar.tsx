@@ -187,6 +187,15 @@ export default function NavBar() {
                   Pay
                 </Button>
               </Link>
+              <Link to="/upi-payment" data-ocid="nav.upi_payment_link">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-white/80 hover:text-accent hover:bg-white/10 gap-1 text-xs"
+                >
+                  UPI Payment
+                </Button>
+              </Link>
               <Link to="/seller-register" data-ocid="nav.seller_link">
                 <Button
                   variant="ghost"
@@ -295,6 +304,11 @@ export default function NavBar() {
                   label: "Payment",
                   path: "/payment",
                   ocid: "nav.payment_link",
+                },
+                {
+                  label: "UPI Payment",
+                  path: "/upi-payment",
+                  ocid: "nav.upi_payment_link",
                 },
                 {
                   label: "Sell With Us",
