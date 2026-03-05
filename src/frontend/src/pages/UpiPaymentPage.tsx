@@ -100,11 +100,11 @@ export default function UpiPaymentPage() {
               </CardHeader>
 
               <CardContent className="pt-6">
-                {/* QR Code image */}
+                {/* QR Code image — centered under heading */}
                 <div className="mb-6 flex flex-col items-center">
                   <div className="rounded-2xl border-4 border-blue-100 bg-white p-3 shadow-md">
                     <img
-                      src="/assets/generated/upi-payment.dim_400x400.png"
+                      src="/assets/generated/upi-qr-code.png"
                       alt="UPI Payment QR Code"
                       width={240}
                       height={240}
@@ -116,7 +116,7 @@ export default function UpiPaymentPage() {
                   </p>
                 </div>
 
-                {/* UPI ID */}
+                {/* UPI ID below QR with copy button */}
                 <div className="rounded-xl border-2 border-blue-200 bg-blue-50 px-4 py-3">
                   <p className="mb-1 text-xs font-semibold uppercase tracking-wider text-blue-600">
                     UPI ID
